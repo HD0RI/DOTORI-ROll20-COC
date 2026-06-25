@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>COC 7th · Roll20 시트 빌더</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* 빌더 UI — 화이트/블랙 톤 */
+    --bg:#fbfbfb; --panel:#ffffff; --panel-2:#f4f4f4; --panel-3:#ededed;
+    --line:#e4e4e4; --line-2:#d6d6d6;
+    --ink:#161616; --ink-2:#3d3d3d; --dim:#8d8d8d;
+    --ui:'Inter',system-ui,sans-serif;
+    --r:6px;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; margin:0; }
+  body{ font-family:var(--ui); background:var(--bg); color:var(--ink);
+    display:flex; flex-direction:column; overflow:hidden; }
+
+  /* ── 상단 바 ── */
+  header.bar{ display:flex; align-items:center; gap:14px; padding:11px 18px;
+    background:var(--panel); border-bottom:1px solid var(--line); flex:0 0 auto; }
+  .logo{ font-weight:700; font-size:16px; letter-spacing:-.2px; display:flex; align-items:center; gap:8px; }
+  .logo .dot{ width:9px; height:9px; background:var(--ink); border-radius:2px; transform:rotate(45deg); }
+  .logo small{ font-weight:500; font-size:11px; color:var(--dim); letter-spacing:1.5px; text-transform:uppercase; }
+  .bar .sp{ flex:1; }
+  .bar button{ font-family:var(--ui); font-size:13px; color:var(--ink); background:var(--panel);
+    border:1px solid var(--line-2); border-radius:var(--r); padding:7px 13px; cursor:pointer; transition:.15s; }
+  .bar button:hover{ background:var(--panel-2); }
+  .bar button.solid{ background:var(--ink); color:#fff; border-color:var(--ink); }
+  .bar button.solid:hover{ background:#000; }
+
+  main{ flex:1; display:flex; min-height:0; }
+
+  /* ── 왼쪽: 미리보기 ── */
+  .stage{ flex:1; min-width:0; overflow:auto; padding:30px;
+    background:repeating-linear-gradient(45deg,#f6f6f6 0 12px,#f1f1f1 12px 24px); }
+  .stage .cap{ text-align:center; color:var(--dim); font-size:12px; letter-spacing:1.5px;
+    text-transform:uppercase; margin-bottom:14px; }
+  .stagerow{ display:flex; gap:24px; align-items:flex-start; justify-content:center; flex-wrap:wrap; }
+
+  /* 굴림 결과 카드 미리보기 */
+  .rollcol{ flex:0 0 280px; --rc-card:#1a1d22; --rc-titlebg:#2a2f37; --rc-titlefg:#e9eaed;
+    --rc-border:#3a3f47; --rc-body:#cfd3da; --t-crit:#d9b03a; --t-extreme:#7bd88f;
+    --t-hard:#8fb8ef; --t-success:#cfd3da; --t-fail:#b06a6a; --t-fumble:#c0392b; }
+  .rollcol-cap{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim);
+    text-align:center; margin-bottom:12px; }
+  .rollcol-note{ font-size:11px; color:var(--dim); line-height:1.5; margin-top:10px; }
+  .rollcard{ max-width:280px; margin:0 auto 12px; border:1px solid var(--rc-border);
+    border-radius:10px; overflow:hidden; box-shadow:0 8px 20px -12px #000; }
+  .rc-title{ background:var(--rc-titlebg); color:var(--rc-titlefg); font-weight:700;
+    text-align:center; padding:7px 10px; font-size:13px; }
+  .rc-tbl{ width:100%; border-collapse:collapse; color:var(--rc-body);
+    background-color:var(--rc-card); background-image:var(--rc-cardimg,none);
+    background-repeat:no-repeat; background-position:bottom center; background-size:100%; }
+  .rc-tbl td{ padding:5px 11px; font-size:12px; border-top:1px solid var(--rc-border); }
+  .rc-l{ opacity:.6; width:40%; }
+  .rc-v{ text-align:right; font-weight:600; }
+  .tier-crit{ color:var(--t-crit); font-weight:800; }
+  .tier-extreme{ color:var(--t-extreme); font-weight:800; }
+  .tier-hard{ color:var(--t-hard); font-weight:700; }
+  .tier-success{ color:var(--t-success); font-weight:700; }
+  .tier-fail{ color:var(--t-fail); }
+  .tier-fumble{ color:var(--t-fumble); font-weight:800; }
+
+  /* 시트 테마 변수 (제작탭에서 바뀜) */
+  .sheet{
+    --s-bg:#f4eeb0; --s-fg:#233b4d; --s-accent:#2e6e91;
+    --s-line:rgba(35,59,77,.22); --s-card:rgba(35,59,77,.06);
+    --s-chip:#2e6e91; --s-chiptext:#f6f1cf;
+    --s-boxbg:var(--s-card); --s-boxborder:1px solid var(--s-line); --s-boxradius:4px;
+    --s-edge:rgba(35,59,77,.35);
+    width:var(--s-width,850px); max-width:100%; margin:0 auto;
+    background-color:var(--s-bg);
+    background-size:cover; background-position:center;
+    color:var(--s-fg);
+    border:var(--s-bw,1px) solid var(--s-edge); border-radius:var(--s-rad,8px);
+    box-shadow:0 14px 40px -24px rgba(0,0,0,.4);
+    font-family:'Gowun Batang', serif; font-size:13px; overflow:hidden;
+  }
+  .sheet .pad{ padding:var(--s-pad,26px); }
+
+  /* 상단 배너/로고 이미지 */
+  .topbanner{ text-align:center; margin-bottom:16px; }
+  .topbanner img{ max-width:100%; max-height:130px; display:inline-block; }
+  .topbanner.empty{ border:1px dashed var(--s-line); border-radius:4px; padding:18px;
+    font-size:12px; opacity:.4; }
+
+  .top{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; }
+  .cards{ flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .scard{ background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius);
+    padding:10px 8px; text-align:center; min-width:0; }
+  .scard .lab{ font-size:12px; opacity:.8; }
+  .scard .big{ font-size:30px; font-weight:700; line-height:1.1; margin:2px 0; }
+  .scard .sub{ font-size:11px; opacity:.55; }
+  .scard .tag{ display:inline-block; margin-top:6px; font-size:10px; padding:2px 7px;
+    border-radius:10px; background:var(--s-chip); color:var(--s-chiptext); white-space:nowrap; }
+  .info{ flex:0 0 var(--s-infow,44%); background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius); padding:12px 16px; }
+  .info .row{ display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 10px; align-items:center; }
+  .info .k{ font-size:11px; opacity:.6; color:var(--s-label); }
+  .info .v{ font-size:13px; border-bottom:1px dotted var(--s-line); min-height:18px; color:var(--s-value); }
+
+  .winter{ text-align:center; margin:22px 0 6px; font-family:'Nanum Myeongjo','Gowun Batang',serif;
+    font-weight:800; letter-spacing:2px;
+    font-size:30px; color:var(--s-accent); position:relative; }
+  .winter::before,.winter::after{ content:""; position:absolute; top:50%; width:26%; height:1px; background:var(--s-line); }
+  .winter::before{ left:8%; } .winter::after{ right:8%; }
+
+  .chars{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; margin:14px 0; text-align:center; }
+  .chars .c .nm{ font-size:12px; opacity:.85; color:var(--s-label); }
+  .chars .c .vv{ font-size:22px; font-weight:700; margin:2px 0; outline:none; color:var(--s-value); }
+  .chars .c .hf{ font-size:11px; opacity:.7; margin-bottom:2px; color:var(--s-hfcol); }
+  .chars .c .ic{ height:18px; display:flex; gap:4px; justify-content:center; align-items:center; }
+
+  .skills{ column-count:var(--s-skillcols,3); column-gap:26px; }
+  .skill{ display:flex; align-items:center; gap:7px; break-inside:avoid; padding:2px 0; font-size:12px; }
+  .skill .nm{ flex:1; opacity:.9; color:var(--s-label); }
+  .skill .val{ min-width:30px; height:18px; padding:0 6px; border-radius:9px; background:var(--s-chip);
+    color:var(--s-chiptext); text-align:center; font-size:11px; line-height:18px; outline:none; }
+  .skill .hf2{ font-size:10px; opacity:.62; min-width:30px; text-align:right; color:var(--s-hfcol); }
+  .skill .ic{ display:inline-flex; gap:3px; align-items:center; color:var(--s-accent); font-size:12px; }
+  .skill .ic img{ width:14px; height:14px; object-fit:contain; }
+  .skill .ic .ricon{ width:14px; text-align:center; }
+  .customskills{ column-count:3; column-gap:26px; margin-top:4px; }
+  .skill.custom .nm{ outline:none; border-bottom:1px dotted var(--s-line); }
+  .skill.custom .delskill{ background:none; border:none; color:var(--s-accent); opacity:.5;
+    cursor:pointer; font-size:12px; padding:0 2px; }
+  .skill.custom .delskill:hover{ opacity:1; }
+  .addskill{ margin-top:10px; background:transparent; border:1px dashed var(--s-line);
+    color:var(--s-accent); border-radius:4px; padding:7px 12px; font-size:12px; cursor:pointer;
+    font-family:inherit; }
+  .addskill:hover{ background:var(--s-card); }
+  .addhint{ font-size:11px; opacity:.45; margin-top:6px; }
+  table.weap td[contenteditable]{ outline:none; }
+  table.weap td[contenteditable]:focus{ background:rgba(255,255,255,.06); }
+  .weap .delweap{ background:none; border:none; color:var(--s-accent); opacity:.5; cursor:pointer; font-size:12px; }
+  .weap .delweap:hover{ opacity:1; }
+  .addweap{ margin:8px 0 0; background:transparent; border:1px dashed var(--s-line);
+    color:var(--s-accent); border-radius:4px; padding:7px 12px; font-size:12px; cursor:pointer; font-family:inherit; }
+  .addweap:hover{ background:var(--s-card); }
+
+  .wtitle{ margin:var(--s-secgap,22px) 0 8px; font-size:12px; color:var(--s-header); letter-spacing:2px; font-weight:700;
+    border-bottom:var(--s-underline,1px) solid var(--s-line); padding-bottom:4px; }
+  table.weap{ width:100%; border-collapse:collapse; font-size:11px; }
+  table.weap th,table.weap td{ border:var(--s-weapb,1px) solid var(--s-line); padding:4px 6px; text-align:center; opacity:.9; }
+  table.weap .wroll{ width:30px; color:var(--s-accent); }
+  table.weap .wdmg .dbl{ font-size:10px; opacity:.55; }
+  .notes .nbox{ border:var(--s-boxborder); background:var(--s-boxbg); min-height:60px; border-radius:var(--s-boxradius); }
+
+  /* ── 오른쪽: 제작탭 ── */
+  aside{ flex:0 0 360px; width:360px; background:var(--panel); border-left:1px solid var(--line);
+    display:flex; flex-direction:column; min-height:0; }
+  .tabs{ display:flex; border-bottom:1px solid var(--line); }
+  .tabs button{ flex:1; padding:12px 4px; font-size:12.5px; color:var(--dim); background:none;
+    border:none; border-bottom:2px solid transparent; cursor:pointer; transition:.15s; }
+  .tabs button:hover{ color:var(--ink); }
+  .tabs button.on{ color:var(--ink); border-bottom-color:var(--ink); font-weight:600; }
+  .panel{ flex:1; overflow:auto; padding:18px; display:none; }
+  .panel.on{ display:block; }
+  .panel h3{ font-size:13px; margin:0 0 3px; font-weight:600; }
+  .panel .desc{ font-size:11.5px; color:var(--dim); margin:0 0 14px; line-height:1.55; }
+  .glabel{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim);
+    margin:18px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--line); }
+  .field{ margin-bottom:12px; }
+  .field label{ display:block; font-size:11.5px; color:var(--ink-2); margin-bottom:4px; }
+  .field input[type=text],.field input[type=url]{ width:100%; padding:8px 10px; font-size:12.5px;
+    border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); }
+  .field input:focus{ outline:none; border-color:var(--ink); }
+  .field .hint{ font-size:10.5px; color:var(--dim); margin-top:3px; }
+
+  .colorrow{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .colorrow label{ flex:1; font-size:12px; }
+  .colorrow input[type=color]{ width:42px; height:30px; border:1px solid var(--line-2);
+    border-radius:var(--r); background:#fff; cursor:pointer; padding:2px; }
+  .colorrow .hex{ width:84px; padding:6px 8px; font-size:11.5px; font-family:monospace;
+    border:1px solid var(--line-2); border-radius:var(--r); }
+
+  .ghbox{ background:var(--panel-2); border:1px solid var(--line); border-radius:var(--r); padding:11px; margin-bottom:6px; }
+  .gh2{ display:flex; gap:9px; margin-bottom:8px; }
+  .gh2 > div{ flex:1; }
+  .gh2 label{ font-size:10.5px; color:var(--ink-2); display:block; margin-bottom:3px; }
+  .gh2 input{ width:100%; padding:6px 8px; font-size:12px; border:1px solid var(--line-2); border-radius:var(--r); }
+  .ghbox .hint code{ background:#e6e6e6; padding:1px 4px; border-radius:3px; font-size:10px; }
+
+  .uprow{ display:flex; gap:6px; align-items:center; }
+  .uprow input[type=url],.uprow input[type=text]{ flex:1; }
+  .upbtn{ flex:0 0 auto; font-size:11px; padding:7px 10px; border:1px solid var(--line-2);
+    background:#fff; border-radius:var(--r); cursor:pointer; white-space:nowrap; }
+  .upbtn:hover{ background:var(--panel-2); }
+  .upname{ font-size:10px; color:var(--dim); margin-top:3px; }
+  .sizerow{ display:flex; align-items:center; gap:6px; margin-top:6px; font-size:11px; color:var(--ink-2); }
+  .sizerow span{ color:var(--dim); }
+  .sizerow input{ width:54px; padding:5px 7px; font-size:11px; border:1px solid var(--line-2); border-radius:var(--r); text-align:center; }
+
+  .preset{ display:flex; gap:8px; margin-top:6px; }
+  .preset button{ flex:1; padding:9px; font-size:12px; border:1px solid var(--line-2);
+    background:#fff; border-radius:var(--r); cursor:pointer; }
+  .preset button:hover{ background:var(--panel-2); }
+  .boxrow{ display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:12.5px; color:var(--ink-2); }
+  .boxrow input[type=range]{ flex:1; }
+  .boxrow input[type=number]{ padding:5px 7px; border:1px solid var(--line-2); border-radius:var(--r); font-size:12px; }
+  .boxrow input[type=checkbox]{ width:15px; height:15px; vertical-align:middle; }
+  .seg{ padding:4px 10px; border:1px solid var(--line-2); background:var(--panel); color:var(--ink);
+    border-radius:var(--r); font-size:12px; cursor:pointer; }
+  .seg.on{ background:var(--ink); color:var(--panel); border-color:var(--ink); }
+
+  .export-btn{ width:100%; margin-bottom:10px; padding:12px; text-align:left; cursor:pointer;
+    background:var(--panel-2); border:1px solid var(--line-2); border-radius:var(--r); }
+  .export-btn:hover{ border-color:var(--ink); }
+  .export-btn b{ display:block; font-size:13px; }
+  .export-btn span{ font-size:11px; color:var(--dim); }
+  .export-btn.solid{ background:var(--ink); border-color:var(--ink); }
+  .export-btn.solid b{ color:#fff; } .export-btn.solid span{ color:#bbb; }
+  textarea.out{ width:100%; height:170px; margin-top:6px; font-family:monospace; font-size:10.5px;
+    line-height:1.4; border:1px solid var(--line-2); border-radius:var(--r); padding:9px; resize:vertical; }
+
+  ::-webkit-scrollbar{ width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb{ background:#d2d2d2; border-radius:5px; }
+
+  @media (max-width:820px){
+    main{ flex-direction:column; }
+    aside{ flex:0 0 auto; width:100%; height:50%; border-left:none; border-top:1px solid var(--line); }
+    .sheet{ width:100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="logo"><span class="dot"></span>COC 시트 빌더 <small>CALL OF CTHULHU · 7TH · ROLL20</small></div>
+  <div class="sp"></div>
+  <button id="bImport">불러오기</button>
+  <button id="bSave">저장</button>
+  <button class="solid" id="bExport">내보내기</button>
+  <input type="file" id="fileIn" accept="application/json" hidden>
+</header>
+
+<main>
+  <section class="stage">
+    <div class="cap">미리보기 — 내보낼 시트와 동일</div>
+    <div class="stagerow">
+      <div class="sheet" id="sheet"><div class="pad" id="sheetPad"></div></div>
+      <div class="rollcol" id="rollPreview">
+        <div class="rollcol-cap">굴림 결과 카드</div>
+        <div id="rollCards"></div>
+        <div class="rollcol-note">Roll20 채팅에 뜨는 굴림 결과 모양입니다. 오른쪽 ‘결과값’ 탭에서 색을 바꾸세요.</div>
+      </div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="tabs">
+      <button class="on" data-tab="img">이미지</button>
+      <button data-tab="color">색상</button>
+      <button data-tab="layout">레이아웃</button>
+      <button data-tab="roll">결과값</button>
+      <button data-tab="export">내보내기</button>
+    </div>
+
+    <!-- 이미지 탭 -->
+    <div class="panel on" id="p-img">
+      <h3>배경 &amp; 다이스 이미지</h3>
+      <p class="desc">URL을 직접 넣거나, 아래 ‘파일’ 버튼으로 이미지를 골라 미리보기에 바로 띄울 수 있습니다. 저장소 정보를 채우면 고른 파일의 깃허브 링크가 URL 칸에 자동으로 입력됩니다.</p>
+
+      <div class="glabel">깃허브 저장소 (자동 링크용)</div>
+      <div class="ghbox">
+        <div class="gh2">
+          <div><label>사용자명</label><input type="text" id="gh-user" placeholder="username"></div>
+          <div><label>저장소</label><input type="text" id="gh-repo" placeholder="repo"></div>
+        </div>
+        <div class="gh2">
+          <div><label>브랜치</label><input type="text" id="gh-branch" placeholder="main"></div>
+          <div><label>폴더</label><input type="text" id="gh-folder" placeholder="images"></div>
+        </div>
+        <div class="hint">파일을 고르면 <code>raw.githubusercontent.com/사용자명/저장소/브랜치/폴더/파일명</code> 링크가 자동 생성됩니다. 그 파일을 저장소의 해당 폴더에 커밋하면 Roll20에서 작동합니다.</div>
+      </div>
+
+      <div class="glabel">상단 이미지 (로고/배너)</div>
+      <div class="field">
+        <label>시트 맨 위 이미지 URL</label>
+        <input type="url" id="img-top" placeholder="https://i.imgur.com/logo.png">
+        <div class="hint">제목 위, 시트 가장 윗부분에 표시됩니다. 권장 <b>600 × 230px</b> (가로 최대 850)</div>
+      </div>
+
+      <div class="glabel">시트 배경 (위치별 겹쳐 깔기)</div>
+      <div class="field">
+        <label>전체 배경 (바닥) URL</label>
+        <input type="url" id="img-bg" placeholder="https://i.imgur.com/xxxx.png">
+        <div class="hint">시트 전체에 cover로 깔립니다. 권장 <b>850 × 1400px</b></div>
+      </div>
+      <div class="field">
+        <label>상단 배경 URL</label>
+        <input type="url" id="img-topbg" placeholder="톱니·사슬 등 윗부분 장식">
+        <div class="hint">시트 맨 위에 고정. 권장 <b>850 × 400px</b> (가로 850 고정)</div>
+      </div>
+      <div class="field">
+        <label>가운데 배경 URL</label>
+        <input type="url" id="img-midbg" placeholder="가운데 띠·찢긴 종이 등">
+        <div class="hint">세로 중앙에 배치. 권장 <b>850 × 300px</b></div>
+      </div>
+      <div class="field">
+        <label>하단 배경 URL</label>
+        <input type="url" id="img-botbg" placeholder="건물 실루엣 등 아랫부분">
+        <div class="hint">시트 맨 아래에 고정. 권장 <b>850 × 400px</b></div>
+      </div>
+
+      <div class="glabel">굴림 아이콘 (능력치·기능당 2개)</div>
+      <div class="field">
+        <label>아이콘 1 — 일반 굴림 (1d100)</label>
+        <input type="url" id="img-icon" placeholder="비우면 ◆ 기본 표시">
+        <div class="hint">정사각형 이미지 권장 · 시트 표시 크기는 아래에서 고정 (기본 14×14px)</div>
+      </div>
+      <div class="field">
+        <label>아이콘 2 — 보너스/페널티 굴림</label>
+        <input type="url" id="img-icon2" placeholder="비우면 ◆ 기본 표시">
+        <div class="hint">정사각형 이미지 권장 · 각 능력치·기능 옆에 굴림 버튼이 두 개씩 들어갑니다.</div>
+      </div>
+    </div>
+
+    <!-- 색상 탭 -->
+    <div class="panel" id="p-color">
+      <h3>색상</h3>
+      <p class="desc">시트 글자·배경·강조색입니다. 배경 이미지를 쓰면 배경색은 덮입니다.</p>
+      <div class="colorrow"><label>글자색</label>
+        <input type="color" id="c-fg" value="#233b4d"><input class="hex" id="h-fg" value="#233b4d"></div>
+      <div class="colorrow"><label>배경색</label>
+        <input type="color" id="c-bg" value="#f4eeb0"><input class="hex" id="h-bg" value="#f4eeb0"></div>
+      <div class="colorrow"><label>강조색</label>
+        <input type="color" id="c-ac" value="#2e6e91"><input class="hex" id="h-ac" value="#2e6e91"></div>
+      <div class="preset">
+        <button data-preset="yellowblue">연노랑·파랑</button>
+        <button data-preset="winter">다크 블루</button>
+        <button data-preset="mono">순수 흑백</button>
+      </div>
+
+      <div class="glabel">사각 박스 (스탯·정보 칸)</div>
+      <div class="boxrow">
+        <label><input type="checkbox" id="box-on" checked> 박스 배경 표시</label>
+      </div>
+      <div class="boxrow">
+        <span>모서리 둥글기</span>
+        <input type="range" id="box-radius" min="0" max="30" value="4">
+        <input type="number" id="box-radius-n" min="0" max="60" value="4" style="width:54px"> px
+      </div>
+
+      <div class="glabel">무기 / 전투 표</div>
+      <div class="boxrow">
+        <span>표 선 두께</span>
+        <input type="range" id="weapb" min="0" max="10" value="1">
+        <input type="number" id="weapb-n" min="0" max="10" value="1" style="width:54px"> px
+      </div>
+
+      <div class="glabel">색상 세분화 (바꾸면 그 색으로 고정)</div>
+      <div class="colorrow"><label>섹션 헤더</label><input type="color" id="cg-header"><input class="hex" id="cg-header-h"></div>
+      <div class="colorrow"><label>라벨(이름·기능명)</label><input type="color" id="cg-label"><input class="hex" id="cg-label-h"></div>
+      <div class="colorrow"><label>값 · 숫자</label><input type="color" id="cg-value"><input class="hex" id="cg-value-h"></div>
+      <div class="colorrow"><label>기능 값 칩</label><input type="color" id="cg-chip"><input class="hex" id="cg-chip-h"></div>
+      <div class="colorrow"><label>절반 · 1/5</label><input type="color" id="cg-hf"><input class="hex" id="cg-hf-h"></div>
+      <div class="preset"><button id="cg-reset">세분화 색 자동으로 초기화</button></div>
+    </div>
+
+    <!-- 레이아웃 탭 -->
+    <div class="panel" id="p-layout">
+      <h3>제목 &amp; 기본값</h3>
+      <p class="desc">시트 상단 문구와 능력치 기본값입니다. 미리보기에서 숫자를 직접 클릭해 바꿔도 됩니다.</p>
+      <div class="field"><label>디바이더 문구</label><input type="text" id="t-winter"></div>
+
+      <h3 style="margin-top:18px">배경 가독성</h3>
+      <p class="desc">배경 이미지 위에 색을 덮어 글자가 묻히지 않게 합니다. 어둡게 하려면 검정, 밝게 하려면 흰색.</p>
+      <div class="colorrow"><label>덮개 색</label><input type="color" id="ov-color"><input class="hex" id="ov-color-h"></div>
+      <div class="boxrow"><span>덮개 진하기</span>
+        <input type="range" id="ov-op" min="0" max="80" value="0">
+        <input type="number" id="ov-op-n" min="0" max="80" value="0" style="width:54px"> %</div>
+
+      <h3 style="margin-top:18px">레이아웃 · 간격</h3>
+      <div class="boxrow"><span>시트 폭</span>
+        <input type="range" id="ly-width" min="600" max="1000" step="10" value="850">
+        <input type="number" id="ly-width-n" min="400" max="1400" value="850" style="width:60px"> px</div>
+      <div class="boxrow"><span>안쪽 여백</span>
+        <input type="range" id="ly-pad" min="8" max="60" value="26">
+        <input type="number" id="ly-pad-n" min="0" max="100" value="26" style="width:54px"> px</div>
+      <div class="boxrow"><span>기능 열 수</span>
+        <button class="seg" data-cols="2">2열</button><button class="seg on" data-cols="3">3열</button><button class="seg" data-cols="4">4열</button></div>
+      <div class="boxrow"><span>정보 박스 폭</span>
+        <input type="range" id="ly-infow" min="30" max="70" value="44">
+        <input type="number" id="ly-infow-n" min="20" max="80" value="44" style="width:54px"> %</div>
+      <div class="boxrow"><span>섹션 간격</span>
+        <input type="range" id="ly-secgap" min="6" max="48" value="22">
+        <input type="number" id="ly-secgap-n" min="0" max="80" value="22" style="width:54px"> px</div>
+
+      <h3 style="margin-top:18px">테두리 · 모양</h3>
+      <div class="boxrow"><span>시트 테두리 두께</span>
+        <input type="range" id="bd-w" min="0" max="8" value="1">
+        <input type="number" id="bd-w-n" min="0" max="20" value="1" style="width:54px"> px</div>
+      <div class="boxrow"><span>시트 모서리 둥글기</span>
+        <input type="range" id="bd-rad" min="0" max="30" value="8">
+        <input type="number" id="bd-rad-n" min="0" max="60" value="8" style="width:54px"> px</div>
+      <div class="colorrow"><label>시트 테두리 색</label><input type="color" id="bd-color"><input class="hex" id="bd-color-h"></div>
+      <div class="boxrow"><span>섹션 밑줄 두께</span>
+        <input type="range" id="bd-ul" min="0" max="4" value="1">
+        <input type="number" id="bd-ul-n" min="0" max="10" value="1" style="width:54px"> px</div>
+    </div>
+
+    <!-- 결과값 탭 -->
+    <div class="panel" id="p-roll">
+      <h3>굴림 결과 카드</h3>
+      <p class="desc">Roll20 채팅에 뜨는 굴림 결과(rolltemplate)의 색을 정합니다. 왼쪽 미리보기에 바로 반영됩니다.</p>
+      <div class="glabel">카드</div>
+      <div class="colorrow"><label>카드 배경</label><input type="color" id="rc-cardBg"><input class="hex" id="rh-cardBg"></div>
+      <div class="colorrow"><label>제목 막대</label><input type="color" id="rc-titleBg"><input class="hex" id="rh-titleBg"></div>
+      <div class="colorrow"><label>제목 글자</label><input type="color" id="rc-titleFg"><input class="hex" id="rh-titleFg"></div>
+      <div class="colorrow"><label>테두리</label><input type="color" id="rc-border"><input class="hex" id="rh-border"></div>
+      <div class="colorrow"><label>본문 글자</label><input type="color" id="rc-bodyFg"><input class="hex" id="rh-bodyFg"></div>
+      <div class="glabel">등급별 색</div>
+      <div class="colorrow"><label>대성공 (01)</label><input type="color" id="rc-crit"><input class="hex" id="rh-crit"></div>
+      <div class="colorrow"><label>극단적 성공</label><input type="color" id="rc-extreme"><input class="hex" id="rh-extreme"></div>
+      <div class="colorrow"><label>어려운 성공</label><input type="color" id="rc-hard"><input class="hex" id="rh-hard"></div>
+      <div class="colorrow"><label>성공</label><input type="color" id="rc-success"><input class="hex" id="rh-success"></div>
+      <div class="colorrow"><label>실패</label><input type="color" id="rc-fail"><input class="hex" id="rh-fail"></div>
+      <div class="colorrow"><label>대실패</label><input type="color" id="rc-fumble"><input class="hex" id="rh-fumble"></div>
+    </div>
+
+    <!-- 내보내기 탭 -->
+    <div class="panel" id="p-export">
+      <h3>Roll20 내보내기</h3>
+      <p class="desc">두 파일을 받아 Roll20 게임 → 설정 → 캐릭터 시트 템플릿의 HTML/CSS 칸에 각각 붙여넣으세요.</p>
+      <button class="export-btn solid" id="dlBoth"><b>두 파일 한 번에 받기</b><span>sheet.html + sheet.css</span></button>
+      <button class="export-btn" id="prevHtml"><b>HTML 미리보기</b><span>코드 확인</span></button>
+      <button class="export-btn" id="prevCss"><b>CSS 미리보기</b><span>이미지 링크 주입 확인</span></button>
+      <textarea class="out" id="exOut" readonly placeholder="여기에 코드가 표시됩니다…"></textarea>
+    </div>
+  </aside>
+</main>
+
+<script>
+/* ===== 데이터 ===== */
+const CHARS = [
+  ['str','근력',80],['dex','민첩',50],['pow','정신력',50],['con','건강',50],
+  ['app','외모',50],['edu','교육',50],['siz','크기',50],['int','지능',50],['luck','행운',50]
+];
+const SKILLS = [
+  ['appraise','감정',5],['archaeology','고고학',1],['spothidden','관찰력',25],
+  ['fighting_brawl','근접전(격투)',25],['mechrepair','기계수리',10],['jump','도약',20],
+  ['listen','듣기',20],['fasttalk','말재주',5],['charm','매혹',15],['law','법률',5],
+  ['disguise','변장',5],['firearms_hg','사격(권총)',20],['firearms_rs','사격(라/산)',25],
+  ['persuade','설득',10],['sleightofhand','손놀림',10],['swim','수영',20],['ride','승마',5],
+  ['psychology','심리학',10],['language_own','언어(모국어)',0],['history','역사',5],
+  ['locksmith','열쇠공',1],['climb','오르기',20],['occult','오컬트',5],['intimidate','위협',15],
+  ['stealth','은밀행동',20],['firstaid','응급처치',30],['medicine','의료',1],
+  ['anthropology','인류학',1],['driveauto','자동차 운전',20],['libraryuse','자료조사',20],
+  ['naturalworld','자연',10],['creditrating','재력',0],['elecrepair','전기수리',10],
+  ['psychoanalysis','정신분석',1],['ophvmachine','중장비 조작',1],['track','추적',10],
+  ['cthulhumythos','크툴루 신화',0],['throw','투척',20],['navigate','항법',10],
+  ['accounting','회계',5],['dodge','회피',0]
+];
+const INFO = [['name','이름'],['occupation','직업'],['move','이동력'],['db','피해보너스'],
+              ['sex','성별'],['age','나이'],['build','체구']];
+
+/* ===== 상태 ===== */
+const cfg = {
+  title:'미명(未名)의 조사관', winter:'PAIR NAME',
+  fg:'#233b4d', bg:'#f4eeb0', accent:'#2e6e91',
+  box:{ on:true, radius:4 },
+  weapBorder:1,
+  overlay:{ color:'#000000', opacity:0 },
+  layout:{ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 },
+  shape:{ borderW:1, radius:8, borderColor:'', underline:1 },
+  col:{ header:'', label:'', value:'', chip:'', hf:'' },
+  topImg:'', bgImg:'', topBgImg:'', midBgImg:'', botBgImg:'', iconImg:'', iconImg2:'', values:{}, customSkills:[], customWeapons:[],
+  gh:{ user:'', repo:'', branch:'main', folder:'images' },
+  uploads:{},
+  size:{ top:{w:600,h:230}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300},
+         botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14} },
+  roll:{ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d',
+         crit:'#6a3fb0', extreme:'#1f7a44', hard:'#2e6e91', success:'#2a4d63', fail:'#b0602a', fumble:'#9e2a2a' }
+};
+CHARS.forEach(([id,,v])=> cfg.values[id]=v);
+SKILLS.forEach(([id,,v])=> cfg.values[id]=v);
+cfg.values.hp_cur=10; cfg.values.hp_max=10; cfg.values.mp_cur=10; cfg.values.mp_max=10;
+cfg.values.san_cur=40; cfg.values.san_max=99;
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ===== 미리보기 빌드 ===== */
+const pad = document.getElementById('sheetPad');
+
+function buildSheet(){
+  let h='';
+  h+=topBannerHtml();
+  h+='<div class="top"><div class="info"><div class="row">';
+  INFO.forEach(([id,lab])=>{
+    const derived=(id==='move'||id==='db'||id==='build');
+    const cell = derived ? `<div class="v" data-derived="${id}"></div>`
+                         : `<div class="v" data-v="${id}" contenteditable="true"></div>`;
+    h+=`<div class="k">${lab}</div>${cell}`;
+  });
+  h+='</div></div><div class="cards">';
+  h+=scard('체력','hp','건강'); h+=scard('마력','mp','평정심'); h+=scard('이성','san','광기의 발작');
+  h+='</div></div>';
+  h+=`<div class="winter" id="winterTxt" contenteditable="true">${esc(cfg.winter)}</div>`;
+  h+='<div class="wtitle">능력치</div>';
+  h+='<div class="chars">';
+  CHARS.forEach(([id,nm])=>{
+    h+=`<div class="c"><div class="nm">${nm}</div>`+
+       `<div class="vv" data-num="${id}" contenteditable="true">${cfg.values[id]}</div>`+
+       `<div class="hf"><span data-half="${id}"></span> · <span data-fifth="${id}"></span></div>`+
+       `<div class="ic" data-icons>${iconsHtml()}</div></div>`;
+  });
+  h+='</div>';
+  h+='<div class="wtitle">기능</div>';
+  h+='<div class="skills">';
+  SKILLS.forEach(([id,nm])=>{
+    h+=`<div class="skill"><span class="ic" data-icons>${iconsHtml()}</span><span class="nm">${nm}</span>`+
+       `<span class="val" data-num="${id}" contenteditable="true">${cfg.values[id]}</span>`+
+       `<span class="hf2"><span data-half="${id}"></span>/<span data-fifth="${id}"></span></span></div>`;
+  });
+  h+='</div>';
+  h+='<div class="customskills">';
+  cfg.customSkills.forEach((s,i)=> h+=customSkillRow(s,i));
+  h+='</div>';
+  h+='<button class="addskill" id="addSkill">+ 기능 추가</button>';
+  h+='<div class="addhint">여기서 추가한 기능은 시트에 포함됩니다. Roll20에서는 플레이어가 +Add로 더 추가할 수도 있습니다.</div>';
+  h+='<div class="wtitle">무기 / 전투</div>';
+  h+='<table class="weap"><tr><th class="wroll"></th><th>무기</th><th>기능</th><th>피해</th><th>사거리</th><th>공격횟수</th><th>탄약</th><th>고장</th><th></th></tr>'+
+     '<tr><td class="wroll">◆</td><td>비무장</td><td>25</td><td class="wdmg">1d3 <span class="dbl">+ db</span></td><td>접촉</td><td>1</td><td>—</td><td>—</td><td></td></tr>';
+  cfg.customWeapons.forEach((w,i)=> h+=customWeaponRow(w,i));
+  h+='</table>';
+  h+='<button class="addweap" id="addWeapon">+ 무기 추가</button>';
+  h+='<div class="notes"><div class="wtitle">기타</div><div class="nbox"></div></div>';
+  pad.innerHTML=h;
+  bindEditable(); applyTheme(); applyLayout(); applyImages(); refreshComputed();
+}
+function scard(lab,key,tag){
+  const dm=(key==='hp'||key==='mp');
+  const maxCell = dm ? `<span data-derived="${key}_max"></span>`
+                     : `<span data-num="${key}_max" contenteditable="true">${cfg.values[key+'_max']}</span>`;
+  return `<div class="scard"><div class="lab">${lab}</div>`+
+    `<div class="big" data-num="${key}_cur" contenteditable="true">${cfg.values[key+'_cur']}</div>`+
+    `<div class="sub"><span data-num="${key}_cur">${cfg.values[key+'_cur']}</span> / ${maxCell}</div>`+
+    `<div class="tag">${tag}</div></div>`;
+}
+function up(key){ return cfg.uploads && cfg.uploads[key] && cfg.uploads[key].dataUrl; }
+function imgSrc(key,urlVal){ return up(key) || urlVal || ''; }      // 미리보기: 업로드 우선
+function exportSrc(key,urlVal){ return urlVal || up(key) || ''; }    // 내보내기: URL 우선, 없으면 임베드
+function bgSpec(resolve){
+  const Z=cfg.size;
+  const layers=[
+    [resolve('topBg',cfg.topBgImg),'top center',`${Z.topBg.w}px ${Z.topBg.h}px`],
+    [resolve('midBg',cfg.midBgImg),'center',`${Z.midBg.w}px ${Z.midBg.h}px`],
+    [resolve('botBg',cfg.botBgImg),'bottom center',`${Z.botBg.w}px ${Z.botBg.h}px`],
+    [resolve('bg',cfg.bgImg),'center',`${Z.bg.w}px ${Z.bg.h}px`]
+  ].filter(l=>l[0]);
+  const ov=cfg.overlay;
+  if(ov && ov.opacity>0){
+    const c=rgbaOf(ov.color, ov.opacity);
+    layers.unshift([`__GRAD__linear-gradient(${c},${c})`,'center','cover']);
+  }
+  if(!layers.length) return { image:'none', position:'center', size:'cover', repeat:'no-repeat' };
+  return {
+    image:    layers.map(x=> x[0].startsWith('__GRAD__') ? x[0].slice(8) : (x[0]?`url("${x[0]}")`:'none')).join(', '),
+    position: layers.map(x=> x[1]).join(', '),
+    size:     layers.map(x=> x[2]).join(', '),
+    repeat:   layers.map(()=> 'no-repeat').join(', ')
+  };
+}
+function bgLayers(){ return bgSpec(imgSrc); }
+
+function topBannerHtml(){
+  const s=imgSrc('top',cfg.topImg), z=cfg.size.top;
+  return s
+    ? `<div class="topbanner" id="topBanner"><img src="${esc(s)}" style="width:${z.w}px;height:${z.h}px;object-fit:contain" alt=""></div>`
+    : `<div class="topbanner empty" id="topBanner">상단 이미지 (로고/배너) — 제작탭 ‘이미지’에서 URL을 넣거나 파일을 고르세요</div>`;
+}
+function oneIcon(url,z){
+  const st=`width:${z.w}px;height:${z.h}px`;
+  return url ? `<img class="ricon" style="${st};object-fit:contain" src="${esc(url)}" alt="">`
+             : `<span class="ricon" style="${st};display:inline-flex;align-items:center;justify-content:center;line-height:1">◆</span>`;
+}
+function iconsHtml(){ return oneIcon(imgSrc('icon',cfg.iconImg),cfg.size.icon)+oneIcon(imgSrc('icon2',cfg.iconImg2),cfg.size.icon2); }
+function customSkillRow(s,i){
+  return `<div class="skill custom"><span class="ic" data-icons>${iconsHtml()}</span>`+
+    `<span class="nm" data-cname="${i}" contenteditable="true">${esc(s.name)}</span>`+
+    `<span class="val" data-cval="${i}" contenteditable="true">${esc(s.value)}</span>`+
+    `<span class="hf2"><span data-chalf="${i}"></span>/<span data-cfifth="${i}"></span></span>`+
+    `<button class="delskill" data-delskill="${i}" title="삭제">✕</button></div>`;
+}
+const WCOLS=['name','skill','dmg','range','atk','ammo','malf'];
+function customWeaponRow(w,i){
+  let td=`<td class="wroll">◆</td>`;
+  td+=`<td contenteditable="true" data-w="name" data-wi="${i}">${esc(w.name||'')}</td>`;
+  td+=`<td contenteditable="true" data-w="skill" data-wi="${i}">${esc(w.skill||'')}</td>`;
+  td+=`<td class="wdmg"><span contenteditable="true" data-w="dmg" data-wi="${i}">${esc(w.dmg||'')}</span> <span class="dbl">+ db</span></td>`;
+  ['range','atk','ammo','malf'].forEach(c=> td+=`<td contenteditable="true" data-w="${c}" data-wi="${i}">${esc(w[c]||'')}</td>`);
+  return `<tr>${td}<td><button class="delweap" data-delweap="${i}" title="삭제">✕</button></td></tr>`;
+}
+
+function hexToRgb(h){ h=String(h||'').replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); const n=parseInt(h||'000000',16); return [n>>16&255, n>>8&255, n&255]; }
+function rgbaOf(hex,a){ const [r,g,b]=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+function contrastOf(hex){ const [r,g,b]=hexToRgb(hex); return (0.299*r+0.587*g+0.114*b)>148 ? '#16242e' : '#f6f1cf'; }
+function applyTheme(){
+  const s=document.getElementById('sheet');
+  s.style.setProperty('--s-fg',cfg.fg);
+  s.style.setProperty('--s-bg',cfg.bg);
+  s.style.setProperty('--s-accent',cfg.accent);
+  s.style.setProperty('--s-line',rgbaOf(cfg.fg,.22));
+  s.style.setProperty('--s-card',rgbaOf(cfg.fg,.06));
+  const chip = cfg.col.chip || cfg.accent;
+  s.style.setProperty('--s-chip', chip);
+  s.style.setProperty('--s-chiptext', contrastOf(chip));
+  const on=cfg.box.on;
+  s.style.setProperty('--s-boxbg', on ? rgbaOf(cfg.fg,.06) : 'transparent');
+  s.style.setProperty('--s-boxborder', on ? `1px solid ${rgbaOf(cfg.fg,.22)}` : '1px solid transparent');
+  s.style.setProperty('--s-boxradius', (cfg.box.radius||0)+'px');
+  s.style.setProperty('--s-edge', cfg.shape.borderColor || rgbaOf(cfg.fg,.35));
+  s.style.setProperty('--s-weapb', (cfg.weapBorder||0)+'px');
+  s.style.setProperty('--s-bw', (cfg.shape.borderW||0)+'px');
+  s.style.setProperty('--s-rad', (cfg.shape.radius||0)+'px');
+  s.style.setProperty('--s-underline', (cfg.shape.underline||0)+'px');
+  s.style.setProperty('--s-header', cfg.col.header || cfg.accent);
+  s.style.setProperty('--s-label', cfg.col.label || rgbaOf(cfg.fg,.85));
+  s.style.setProperty('--s-value', cfg.col.value || cfg.accent);
+  s.style.setProperty('--s-hfcol', cfg.col.hf || cfg.fg);
+}
+function applyLayout(){
+  const s=document.getElementById('sheet'), L=cfg.layout;
+  s.style.setProperty('--s-width', (L.width||850)+'px');
+  s.style.setProperty('--s-pad', (L.padding||26)+'px');
+  s.style.setProperty('--s-skillcols', (L.skillCols||3));
+  s.style.setProperty('--s-infow', (L.infoWidth||44)+'%');
+  s.style.setProperty('--s-secgap', (L.sectionGap||22)+'px');
+}
+function applyImages(){
+  const s=document.getElementById('sheet');
+  const bg=bgLayers();
+  s.style.backgroundImage    = bg.image;
+  s.style.backgroundPosition = bg.position;
+  s.style.backgroundSize     = bg.size;
+  s.style.backgroundRepeat   = bg.repeat;
+  const tb=document.getElementById('topBanner');
+  if(tb) tb.outerHTML = topBannerHtml();
+  pad.querySelectorAll('[data-icons]').forEach(el=>{ el.innerHTML=iconsHtml(); });
+  applyRollDesign();
+}
+
+/* ===== 파생 수치 계산 ===== */
+function computeDerived(){
+  const v=cfg.values;
+  const con=+v.con||0, siz=+v.siz||0, pow=+v.pow||0, str=+v.str||0, dex=+v.dex||0;
+  const hpMax=Math.floor((con+siz)/10);
+  const mpMax=Math.floor(pow/5);
+  const mov=(str<siz&&dex<siz)?7:((str>siz&&dex>siz)?9:8);
+  const ss=str+siz; let db, build;
+  if(ss<=64){db='−2';build=-2;}
+  else if(ss<=84){db='−1';build=-1;}
+  else if(ss<=124){db='0';build=0;}
+  else if(ss<=164){db='+1D4';build=1;}
+  else if(ss<=204){db='+1D6';build=2;}
+  else { const t=Math.floor((ss-205)/80); db='+'+(2+t)+'D6'; build=3+t; }
+  // 굴림에 그대로 이어붙일 수 있는 db 문자열 (예: "+1d4", "-2", "" )
+  const dbRoll = db==='0' ? '' : db.replace('−','-').replace('D','d');
+  return {hpMax,mpMax,mov,db,build,dbRoll};
+}
+function refreshComputed(){
+  pad.querySelectorAll('[data-half]').forEach(el=>{ el.textContent=Math.floor((+cfg.values[el.dataset.half]||0)/2); });
+  pad.querySelectorAll('[data-fifth]').forEach(el=>{ el.textContent=Math.floor((+cfg.values[el.dataset.fifth]||0)/5); });
+  pad.querySelectorAll('[data-chalf]').forEach(el=>{ const s=cfg.customSkills[+el.dataset.chalf]; el.textContent=s?Math.floor((+s.value||0)/2):0; });
+  pad.querySelectorAll('[data-cfifth]').forEach(el=>{ const s=cfg.customSkills[+el.dataset.cfifth]; el.textContent=s?Math.floor((+s.value||0)/5):0; });
+  const d=computeDerived();
+  cfg.values.hp_max=d.hpMax; cfg.values.mp_max=d.mpMax;
+  cfg.values.move=d.mov; cfg.values.db=d.db; cfg.values.build=d.build;
+  pad.querySelectorAll('[data-derived]').forEach(el=>{ el.textContent=cfg.values[el.dataset.derived]; });
+}
+
+/* ===== 굴림 결과 카드 미리보기 ===== */
+const SAMPLE_CARDS = [
+  { title:'기능 판정 — 관찰력', target:'50 / 25 / 10', roll:'08', tier:'extreme', label:'극단적 성공' },
+  { title:'능력치 판정 — 근력', target:'80 / 40 / 16', roll:'37', tier:'hard',    label:'어려운 성공' },
+  { title:'기능 판정 — 회계', target:'05 / 02 / 01', roll:'63', tier:'success',  label:'성공' },
+  { title:'이성 판정 — SAN',  target:'40 / 20 / 08', roll:'100', tier:'fumble',  label:'대실패' }
+];
+function renderRollCards(){
+  const wrap=document.getElementById('rollCards'); if(!wrap) return;
+  wrap.innerHTML = SAMPLE_CARDS.map(c=>
+    `<div class="rollcard"><div class="rc-title">${c.title}</div>`+
+    `<table class="rc-tbl">`+
+    `<tr><td class="rc-l">목표값</td><td class="rc-v">${c.target}</td></tr>`+
+    `<tr><td class="rc-l">굴림</td><td class="rc-v">${c.roll}</td></tr>`+
+    `<tr><td class="rc-l">결과</td><td class="rc-v tier-${c.tier}">${c.label}</td></tr>`+
+    `</table></div>`).join('');
+}
+function applyRollDesign(){
+  const r=cfg.roll, el=document.getElementById('rollPreview'); if(!el) return;
+  const mid=imgSrc('midBg',cfg.midBgImg);
+  const map={ '--rc-card':r.cardBg, '--rc-cardimg':(mid?`url("${mid}")`:'none'),
+    '--rc-titlebg':r.titleBg, '--rc-titlefg':r.titleFg,
+    '--rc-border':r.border, '--rc-body':r.bodyFg, '--t-crit':r.crit, '--t-extreme':r.extreme,
+    '--t-hard':r.hard, '--t-success':r.success, '--t-fail':r.fail, '--t-fumble':r.fumble };
+  for(const k in map) el.style.setProperty(k, map[k]);
+}
+function bindEditable(){
+  pad.querySelectorAll('[data-num]').forEach(el=> el.addEventListener('input',()=>{ cfg.values[el.dataset.num]=el.textContent.trim(); refreshComputed(); }));
+  pad.querySelectorAll('[data-v]').forEach(el=> el.addEventListener('input',()=>{ cfg.values[el.dataset.v]=el.textContent.trim(); }));
+  const w=document.getElementById('winterTxt');
+  if(w) w.addEventListener('input',()=>{ cfg.winter=w.textContent; const t=document.getElementById('t-winter'); if(t) t.value=cfg.winter; });
+  pad.querySelectorAll('[data-cname]').forEach(el=> el.addEventListener('input',()=>{ cfg.customSkills[+el.dataset.cname].name=el.textContent.trim(); }));
+  pad.querySelectorAll('[data-cval]').forEach(el=> el.addEventListener('input',()=>{ cfg.customSkills[+el.dataset.cval].value=el.textContent.trim(); refreshComputed(); }));
+  pad.querySelectorAll('[data-delskill]').forEach(b=> b.addEventListener('click',()=>{ cfg.customSkills.splice(+b.dataset.delskill,1); buildSheet(); }));
+  const add=document.getElementById('addSkill');
+  if(add) add.addEventListener('click',()=>{ cfg.customSkills.push({name:'새 기능',value:0}); buildSheet(); });
+  pad.querySelectorAll('[data-w]').forEach(el=> el.addEventListener('input',()=>{ cfg.customWeapons[+el.dataset.wi][el.dataset.w]=el.textContent.trim(); }));
+  pad.querySelectorAll('[data-delweap]').forEach(b=> b.addEventListener('click',()=>{ cfg.customWeapons.splice(+b.dataset.delweap,1); buildSheet(); }));
+  const addW=document.getElementById('addWeapon');
+  if(addW) addW.addEventListener('click',()=>{ cfg.customWeapons.push({name:'새 무기',skill:'',dmg:'',range:'',atk:'1',ammo:'',malf:''}); buildSheet(); });
+}
+
+/* ===== 제작탭 ===== */
+document.querySelectorAll('.tabs button').forEach(b=> b.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
+});
+
+document.getElementById('img-top').addEventListener('input',e=>{ cfg.topImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-bg').addEventListener('input',e=>{ cfg.bgImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-topbg').addEventListener('input',e=>{ cfg.topBgImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-midbg').addEventListener('input',e=>{ cfg.midBgImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-botbg').addEventListener('input',e=>{ cfg.botBgImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-icon').addEventListener('input',e=>{ cfg.iconImg=e.target.value.trim(); applyImages(); });
+document.getElementById('img-icon2').addEventListener('input',e=>{ cfg.iconImg2=e.target.value.trim(); applyImages(); });
+
+/* ── 깃허브 저장소 설정 ── */
+['user','repo','branch','folder'].forEach(k=>{
+  const el=document.getElementById('gh-'+k);
+  el.value=cfg.gh[k]||'';
+  el.addEventListener('input',()=>{ cfg.gh[k]=el.value.trim(); });
+});
+function rawUrl(filename){
+  const g=cfg.gh; if(!g.user||!g.repo) return '';
+  const path=[g.branch||'main', g.folder||'images', filename].map(encodeURIComponent).join('/');
+  return `https://raw.githubusercontent.com/${encodeURIComponent(g.user)}/${encodeURIComponent(g.repo)}/${path}`;
+}
+
+/* ── 모든 이미지 입력에 ‘파일’ 업로드 버튼 부착 ── */
+function attachUpload(input, key){
+  const wrap=document.createElement('div'); wrap.className='uprow';
+  input.parentNode.insertBefore(wrap, input);
+  wrap.appendChild(input);
+  const btn=document.createElement('label'); btn.className='upbtn'; btn.textContent='파일';
+  const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.hidden=true;
+  btn.appendChild(file); wrap.appendChild(btn);
+  const name=document.createElement('div'); name.className='upname';
+  wrap.parentNode.insertBefore(name, wrap.nextSibling);
+  file.addEventListener('change',()=>{
+    const f=file.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=()=>{
+      cfg.uploads[key]={ name:f.name, dataUrl:r.result };
+      const link=rawUrl(f.name);
+      if(link){ input.value=link; input.dispatchEvent(new Event('input')); name.textContent='깃허브 링크 자동 입력됨 · '+f.name+' 을(를) 저장소에 커밋하세요'; }
+      else { name.textContent='미리보기 표시됨 · '+f.name+' (Roll20에는 URL 필요 — 저장소 정보를 채우세요)'; }
+      applyImages();
+    };
+    r.readAsDataURL(f);
+  });
+}
+attachUpload(document.getElementById('img-top'),'top');
+attachUpload(document.getElementById('img-bg'),'bg');
+attachUpload(document.getElementById('img-topbg'),'topBg');
+attachUpload(document.getElementById('img-midbg'),'midBg');
+attachUpload(document.getElementById('img-botbg'),'botBg');
+attachUpload(document.getElementById('img-icon'),'icon');
+attachUpload(document.getElementById('img-icon2'),'icon2');
+
+/* ── 슬롯별 고정 크기(가로×세로 px) 입력 ── */
+function attachSize(inputId, key){
+  const input=document.getElementById(inputId); if(!input) return;
+  const field=input.closest('.field'); if(!field) return;
+  const z=cfg.size[key];
+  const row=document.createElement('div'); row.className='sizerow';
+  row.innerHTML=`<span>고정 크기</span>`+
+    `<input type="number" min="1" data-szk="${key}" data-sz="w" value="${z.w}"> ×`+
+    `<input type="number" min="1" data-szk="${key}" data-sz="h" value="${z.h}"><span>px</span>`;
+  field.appendChild(row);
+  row.querySelectorAll('input').forEach(inp=> inp.addEventListener('input',()=>{
+    cfg.size[key][inp.dataset.sz]=parseInt(inp.value)||1;
+    buildSheet();   // 아이콘은 재빌드가 필요, 배경/배너는 applyImages로 충분하나 일괄 처리
+  }));
+}
+[['img-top','top'],['img-bg','bg'],['img-topbg','topBg'],['img-midbg','midBg'],
+ ['img-botbg','botBg'],['img-icon','icon'],['img-icon2','icon2']].forEach(([id,k])=> attachSize(id,k));
+
+function colorPair(picker,hex,key){
+  const p=document.getElementById(picker), h=document.getElementById(hex);
+  const set=v=>{ cfg[key]=v; p.value=v; h.value=v; applyTheme(); };
+  p.addEventListener('input',()=>set(p.value));
+  h.addEventListener('input',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(h.value)) set(h.value); });
+}
+colorPair('c-fg','h-fg','fg'); colorPair('c-bg','h-bg','bg'); colorPair('c-ac','h-ac','accent');
+
+/* 사각 박스 on/off + 모서리 둥글기 */
+const boxOn=document.getElementById('box-on'), boxR=document.getElementById('box-radius'), boxRN=document.getElementById('box-radius-n');
+boxOn.checked=cfg.box.on; boxR.value=cfg.box.radius; boxRN.value=cfg.box.radius;
+boxOn.addEventListener('change',()=>{ cfg.box.on=boxOn.checked; applyTheme(); });
+function setRadius(v){ v=Math.max(0,parseInt(v)||0); cfg.box.radius=v; boxR.value=Math.min(v,30); boxRN.value=v; applyTheme(); }
+boxR.addEventListener('input',()=>setRadius(boxR.value));
+boxRN.addEventListener('input',()=>setRadius(boxRN.value));
+
+/* 무기 표 선 두께 */
+const weapB=document.getElementById('weapb'), weapBN=document.getElementById('weapb-n');
+weapB.value=cfg.weapBorder; weapBN.value=cfg.weapBorder;
+function setWeapB(v){ v=Math.max(0,Math.min(10,parseInt(v)||0)); cfg.weapBorder=v; weapB.value=v; weapBN.value=v; applyTheme(); }
+weapB.addEventListener('input',()=>setWeapB(weapB.value));
+weapBN.addEventListener('input',()=>setWeapB(weapBN.value));
+
+/* 배경 오버레이 */
+const ovC=document.getElementById('ov-color'), ovCH=document.getElementById('ov-color-h'),
+      ovO=document.getElementById('ov-op'), ovON=document.getElementById('ov-op-n');
+ovC.value=cfg.overlay.color; ovCH.value=cfg.overlay.color;
+ovO.value=Math.round(cfg.overlay.opacity*100); ovON.value=Math.round(cfg.overlay.opacity*100);
+function setOvColor(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.overlay.color=v; ovC.value=v; ovCH.value=v; applyImages(); } }
+ovC.addEventListener('input',()=>setOvColor(ovC.value));
+ovCH.addEventListener('input',()=>setOvColor(ovCH.value));
+function setOvOp(v){ v=Math.max(0,Math.min(80,parseInt(v)||0)); cfg.overlay.opacity=v/100; ovO.value=v; ovON.value=v; applyImages(); }
+ovO.addEventListener('input',()=>setOvOp(ovO.value));
+ovON.addEventListener('input',()=>setOvOp(ovON.value));
+
+/* 레이아웃 · 간격 */
+function lyPair(rangeId,numId,key,min,max){
+  const r=document.getElementById(rangeId), n=document.getElementById(numId);
+  r.value=cfg.layout[key]; n.value=cfg.layout[key];
+  const set=v=>{ v=Math.max(min,Math.min(max,parseInt(v)||0)); cfg.layout[key]=v; r.value=Math.min(v,+r.max); n.value=v; applyLayout(); };
+  r.addEventListener('input',()=>set(r.value));
+  n.addEventListener('input',()=>set(n.value));
+}
+lyPair('ly-width','ly-width-n','width',400,1400);
+lyPair('ly-pad','ly-pad-n','padding',0,100);
+lyPair('ly-infow','ly-infow-n','infoWidth',20,80);
+lyPair('ly-secgap','ly-secgap-n','sectionGap',0,80);
+document.querySelectorAll('[data-cols]').forEach(b=> b.addEventListener('click',()=>{
+  cfg.layout.skillCols=+b.dataset.cols;
+  document.querySelectorAll('[data-cols]').forEach(x=> x.classList.toggle('on', x===b));
+  applyLayout();
+}));
+
+/* 테두리·모양 */
+function objNumPair(rangeId,obj,key,min,max){
+  const r=document.getElementById(rangeId), n=document.getElementById(rangeId+'-n');
+  r.value=obj[key]; n.value=obj[key];
+  const set=v=>{ v=Math.max(min,Math.min(max,parseInt(v)||0)); obj[key]=v; r.value=Math.min(v,+r.max); n.value=v; applyTheme(); };
+  r.addEventListener('input',()=>set(r.value));
+  n.addEventListener('input',()=>set(n.value));
+}
+objNumPair('bd-w',cfg.shape,'borderW',0,20);
+objNumPair('bd-rad',cfg.shape,'radius',0,60);
+objNumPair('bd-ul',cfg.shape,'underline',0,10);
+(function(){
+  const p=document.getElementById('bd-color'), h=document.getElementById('bd-color-h');
+  const init=cfg.shape.borderColor||cfg.fg; p.value=init; h.value=init;
+  const set=v=>{ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.shape.borderColor=v; p.value=v; h.value=v; applyTheme(); } };
+  p.addEventListener('input',()=>set(p.value)); h.addEventListener('input',()=>set(h.value));
+})();
+
+/* 색상 세분화 */
+function granColor(id,key,fb){
+  const p=document.getElementById(id), h=document.getElementById(id+'-h');
+  const init=cfg.col[key]||fb(); p.value=init; h.value=init;
+  const set=v=>{ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.col[key]=v; p.value=v; h.value=v; applyTheme(); } };
+  p.addEventListener('input',()=>set(p.value)); h.addEventListener('input',()=>set(h.value));
+}
+const GRAN=[['cg-header','header',()=>cfg.accent],['cg-label','label',()=>cfg.fg],['cg-value','value',()=>cfg.accent],['cg-chip','chip',()=>cfg.accent],['cg-hf','hf',()=>cfg.fg]];
+GRAN.forEach(([id,key,fb])=> granColor(id,key,fb));
+document.getElementById('cg-reset').onclick=()=>{
+  cfg.col={header:'',label:'',value:'',chip:'',hf:''}; applyTheme();
+  GRAN.forEach(([id,key,fb])=>{ const v=fb(); document.getElementById(id).value=v; document.getElementById(id+'-h').value=v; });
+};
+
+/* 결과값(굴림 카드) 색상 바인딩 */
+const ROLL_KEYS=['cardBg','titleBg','titleFg','border','bodyFg','crit','extreme','hard','success','fail','fumble'];
+ROLL_KEYS.forEach(k=>{
+  const p=document.getElementById('rc-'+k), h=document.getElementById('rh-'+k);
+  if(!p) return;
+  p.value=cfg.roll[k]; h.value=cfg.roll[k];
+  const set=v=>{ cfg.roll[k]=v; p.value=v; h.value=v; applyRollDesign(); };
+  p.addEventListener('input',()=>set(p.value));
+  h.addEventListener('input',()=>{ if(/^#[0-9a-fA-F]{6}$/.test(h.value)) set(h.value); });
+});
+
+document.querySelectorAll('[data-preset]').forEach(b=> b.onclick=()=>{
+  if(b.dataset.preset==='mono') setColors('#ededed','#0a0a0a','#bdbdbd');
+  else if(b.dataset.preset==='winter') setColors('#e9eaed','#0c0d10','#9fb4d4');
+  else setColors('#233b4d','#f4eeb0','#2e6e91');
+});
+function setColors(fg,bg,ac){
+  cfg.fg=fg; cfg.bg=bg; cfg.accent=ac;
+  document.getElementById('c-fg').value=fg; document.getElementById('h-fg').value=fg;
+  document.getElementById('c-bg').value=bg; document.getElementById('h-bg').value=bg;
+  document.getElementById('c-ac').value=ac; document.getElementById('h-ac').value=ac;
+  applyTheme();
+}
+
+const tWinter=document.getElementById('t-winter');
+tWinter.value=cfg.winter;
+tWinter.addEventListener('input',()=>{ cfg.winter=tWinter.value; const w=document.getElementById('winterTxt'); if(w) w.textContent=cfg.winter; });
+
+/* ===== 저장 / 불러오기 ===== */
+document.getElementById('bSave').onclick=()=>download('coc-builder.json', JSON.stringify(cfg,null,2),'application/json');
+document.getElementById('bImport').onclick=()=>document.getElementById('fileIn').click();
+document.getElementById('fileIn').onchange=e=>{
+  const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ try{ Object.assign(cfg,JSON.parse(r.result)); syncInputs(); buildSheet(); }
+    catch(_){ alert('불러오기 실패: 올바른 파일이 아닙니다.'); } };
+  r.readAsText(f);
+};
+function syncInputs(){
+  cfg.gh = cfg.gh || { user:'', repo:'', branch:'main', folder:'images' };
+  cfg.uploads = cfg.uploads || {};
+  cfg.customSkills = cfg.customSkills || [];
+  cfg.customWeapons = cfg.customWeapons || [];
+  cfg.box = Object.assign({ on:true, radius:4 }, cfg.box||{});
+  if(typeof cfg.weapBorder!=='number') cfg.weapBorder=1;
+  if(weapB){ weapB.value=cfg.weapBorder; weapBN.value=cfg.weapBorder; }
+  cfg.overlay = Object.assign({ color:'#000000', opacity:0 }, cfg.overlay||{});
+  cfg.layout = Object.assign({ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 }, cfg.layout||{});
+  cfg.shape = Object.assign({ borderW:1, radius:8, borderColor:'', underline:1 }, cfg.shape||{});
+  cfg.col = Object.assign({ header:'', label:'', value:'', chip:'', hf:'' }, cfg.col||{});
+  ['bd-w','bd-rad','bd-ul'].forEach(id=>{ const k={'bd-w':'borderW','bd-rad':'radius','bd-ul':'underline'}[id]; const r=document.getElementById(id), n=document.getElementById(id+'-n'); if(r){ r.value=cfg.shape[k]; n.value=cfg.shape[k]; } });
+  (function(){ const bc=document.getElementById('bd-color'); if(bc){ const v=cfg.shape.borderColor||cfg.fg; bc.value=v; document.getElementById('bd-color-h').value=v; } })();
+  [['cg-header','header',cfg.accent],['cg-label','label',cfg.fg],['cg-value','value',cfg.accent],['cg-chip','chip',cfg.accent],['cg-hf','hf',cfg.fg]].forEach(([id,k,fb])=>{ const p=document.getElementById(id); if(p){ const v=cfg.col[k]||fb; p.value=v; document.getElementById(id+'-h').value=v; } });
+  if(ovC){ ovC.value=cfg.overlay.color; ovCH.value=cfg.overlay.color; ovO.value=Math.round(cfg.overlay.opacity*100); ovON.value=Math.round(cfg.overlay.opacity*100); }
+  [['ly-width','width'],['ly-pad','padding'],['ly-infow','infoWidth'],['ly-secgap','sectionGap']].forEach(([id,k])=>{
+    const r=document.getElementById(id), n=document.getElementById(id+'-n'); if(r){ r.value=cfg.layout[k]; n.value=cfg.layout[k]; }
+  });
+  document.querySelectorAll('[data-cols]').forEach(x=> x.classList.toggle('on', +x.dataset.cols===cfg.layout.skillCols));
+  applyLayout();
+  boxOn.checked=cfg.box.on; boxR.value=Math.min(cfg.box.radius,30); boxRN.value=cfg.box.radius;
+  cfg.size = Object.assign({ top:{w:600,h:230}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300}, botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14} }, cfg.size||{});
+  document.querySelectorAll('.sizerow input[data-szk]').forEach(inp=>{
+    const z=cfg.size[inp.dataset.szk]; if(z) inp.value=z[inp.dataset.sz];
+  });
+  cfg.roll = Object.assign({ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d', crit:'#6a3fb0', extreme:'#1f7a44', hard:'#2e6e91', success:'#2a4d63', fail:'#b0602a', fumble:'#9e2a2a' }, cfg.roll||{});
+  ['cardBg','titleBg','titleFg','border','bodyFg','crit','extreme','hard','success','fail','fumble'].forEach(k=>{
+    const p=document.getElementById('rc-'+k), h=document.getElementById('rh-'+k);
+    if(p){ p.value=cfg.roll[k]; h.value=cfg.roll[k]; }
+  });
+  applyRollDesign();
+  document.getElementById('img-top').value=cfg.topImg||'';
+  document.getElementById('img-bg').value=cfg.bgImg||'';
+  document.getElementById('img-topbg').value=cfg.topBgImg||'';
+  document.getElementById('img-midbg').value=cfg.midBgImg||'';
+  document.getElementById('img-botbg').value=cfg.botBgImg||'';
+  document.getElementById('img-icon').value=cfg.iconImg||'';
+  document.getElementById('img-icon2').value=cfg.iconImg2||'';
+  ['user','repo','branch','folder'].forEach(k=>{ const el=document.getElementById('gh-'+k); if(el) el.value=cfg.gh[k]||''; });
+  setColors(cfg.fg,cfg.bg,cfg.accent);
+  tWinter.value=cfg.winter;
+}
+
+/* ===== 내보내기 ===== */
+function cocRollVal(name, targetExpr, bonus){
+  const roll = bonus ? '?{보너스·페널티|보너스,2d100kl1|페널티,2d100kh1}' : '1d100';
+  const nm = bonus ? name+' (보너스/페널티)' : name;
+  return `&{template:coc} {{name=${nm}}} {{success=[[${targetExpr}]]}} {{hard=[[floor((${targetExpr})/2)]]}} {{extreme=[[floor((${targetExpr})/5)]]}} {{roll1=[[${roll}]]}}`;
+}
+function weaponRollVal(nameAttr, skillAttr, dmgAttr){
+  return `&{template:coc} {{name=@{${nameAttr}}}} {{success=[[@{${skillAttr}}]]}} {{hard=[[floor(@{${skillAttr}}/2)]]}} {{extreme=[[floor(@{${skillAttr}}/5)]]}} {{roll1=[[1d100]]}} {{damage=[[@{${dmgAttr}}@{db_roll}]]}}`;
+}
+function rollTemplateHtml(){
+  return [
+'<rolltemplate class="sheet-rolltemplate-coc">',
+'  <table class="coc-card"><caption>{{name}}</caption>',
+'    <tr><td class="coc-l">목표값</td><td class="coc-v">{{success}} / {{hard}} / {{extreme}}</td></tr>',
+'    <tr><td class="coc-l">굴림</td><td class="coc-v">{{roll1}}</td></tr>',
+'    <tr><td class="coc-l">결과</td>',
+'      {{#rollTotal() roll1 1}}<td class="coc-v tier-crit">대성공</td>{{/rollTotal() roll1 1}}',
+'      {{#rollBetween() roll1 2 success}}',
+'        {{#rollGreater() roll1 hard}}<td class="coc-v tier-success">성공</td>{{/rollGreater() roll1 hard}}',
+'        {{#rollBetween() roll1 2 hard}}',
+'          {{#rollGreater() roll1 extreme}}<td class="coc-v tier-hard">어려운 성공</td>{{/rollGreater() roll1 extreme}}',
+'          {{#rollBetween() roll1 2 extreme}}<td class="coc-v tier-extreme">극단적 성공</td>{{/rollBetween() roll1 2 extreme}}',
+'        {{/rollBetween() roll1 2 hard}}',
+'      {{/rollBetween() roll1 2 success}}',
+'      {{#rollGreater() roll1 success}}',
+'        {{#rollGreater() success 49}}',
+'          {{#rollTotal() roll1 100}}<td class="coc-v tier-fumble">대실패</td>{{/rollTotal() roll1 100}}',
+'          {{#rollLess() roll1 100}}<td class="coc-v tier-fail">실패</td>{{/rollLess() roll1 100}}',
+'        {{/rollGreater() success 49}}',
+'        {{#rollLess() success 50}}',
+'          {{#rollGreater() roll1 95}}<td class="coc-v tier-fumble">대실패</td>{{/rollGreater() roll1 95}}',
+'          {{#rollLess() roll1 96}}<td class="coc-v tier-fail">실패</td>{{/rollLess() roll1 96}}',
+'        {{/rollLess() success 50}}',
+'      {{/rollGreater() roll1 success}}',
+'    </tr>',
+'    {{#damage}}<tr><td class="coc-l">피해</td><td class="coc-v">{{damage}}</td></tr>{{/damage}}',
+'  </table>',
+'</rolltemplate>'
+  ].join('\n');
+}
+function rollTemplateCss(){
+  const r=cfg.roll;
+  const mid=exportSrc('midBg',cfg.midBgImg);
+  const cardImg = mid
+    ? `background-color:${r.cardBg}; background-image:url('${mid}'); background-repeat:no-repeat; background-position:bottom center; background-size:100%;`
+    : `background:${r.cardBg};`;
+  return [
+'',
+'/* 굴림 결과 카드 (rolltemplate) — 레퍼런스 구조: 제목 윗부분 둥글게 / 본문 아래 둥글게 + 가운데 배경을 하단에 공유 */',
+`.sheet-rolltemplate-coc table{ width:100%; max-width:280px; color:${r.bodyFg}; border-collapse:separate; ${cardImg} border-radius:0 0 12px 12px; }`,
+`.sheet-rolltemplate-coc caption{ background:${r.titleBg}; color:${r.titleFg}; font-weight:bold; text-align:center; padding:5px 8px; font-size:14px; border-radius:12px 12px 0 0; }`,
+`.sheet-rolltemplate-coc td{ padding:4px 9px; border-bottom:1px solid ${r.border}; }`,
+'.sheet-rolltemplate-coc .coc-l{ opacity:.65; text-align:left; }',
+'.sheet-rolltemplate-coc .coc-v{ text-align:right; font-weight:600; }',
+`.sheet-rolltemplate-coc .tier-crit{ color:${r.crit}; font-weight:800; }`,
+`.sheet-rolltemplate-coc .tier-extreme{ color:${r.extreme}; font-weight:800; }`,
+`.sheet-rolltemplate-coc .tier-hard{ color:${r.hard}; font-weight:700; }`,
+`.sheet-rolltemplate-coc .tier-success{ color:${r.success}; font-weight:700; }`,
+`.sheet-rolltemplate-coc .tier-fail{ color:${r.fail}; }`,
+`.sheet-rolltemplate-coc .tier-fumble{ color:${r.fumble}; font-weight:800; }`
+  ].join('\n');
+}
+function fontFaceCss(){
+  return [
+'/* 웹폰트 — Roll20에서도 빌더와 동일한 폰트로 표시 (fontsource CDN) */',
+"@font-face{ font-family:'Gowun Batang'; font-weight:400; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang/files/gowun-batang-korean-400-normal.woff2') format('woff2'); }",
+"@font-face{ font-family:'Gowun Batang'; font-weight:700; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang/files/gowun-batang-korean-700-normal.woff2') format('woff2'); }",
+"@font-face{ font-family:'Nanum Myeongjo'; font-weight:400; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/nanum-myeongjo/files/nanum-myeongjo-korean-400-normal.woff2') format('woff2'); }",
+"@font-face{ font-family:'Nanum Myeongjo'; font-weight:800; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/nanum-myeongjo/files/nanum-myeongjo-korean-800-normal.woff2') format('woff2'); }",
+''
+  ].join('\n');
+}
+function buildCss(){
+  const L=[fontFaceCss()];
+  const colHeader = cfg.col.header || cfg.accent;
+  const colLabel  = cfg.col.label  || rgbaOf(cfg.fg,.85);
+  const colValue  = cfg.col.value  || cfg.accent;
+  const colChip   = cfg.col.chip   || cfg.accent;
+  const colChipT  = contrastOf(colChip);
+  const colHf     = cfg.col.hf     || cfg.fg;
+  const edge      = cfg.shape.borderColor || rgbaOf(cfg.fg,.35);
+  L.push('/* COC 7th 커스텀 시트 — 빌더 생성 CSS */');
+  L.push('.charsheet .coc-sheet{');
+  L.push(`  --fg:${cfg.fg}; --accent:${cfg.accent}; --line:${rgbaOf(cfg.fg,.22)};`);
+  L.push(`  background-color:${cfg.bg};`);
+  const _bg=bgSpec(exportSrc);
+  if(_bg.image.replace(/none|,|\s/g,'')){
+    L.push(`  background-image:${_bg.image};`);
+    L.push(`  background-position:${_bg.position};`);
+    L.push(`  background-size:${_bg.size};`);
+    L.push(`  background-repeat:${_bg.repeat};`);
+  }
+  L.push(`  color:var(--fg); font-family:'Gowun Batang',serif; font-size:13px; padding:${cfg.layout.padding}px; width:100%; max-width:${cfg.layout.width}px; box-sizing:border-box; border:${cfg.shape.borderW}px solid ${edge}; border-radius:${cfg.shape.radius}px;`);
+  L.push('}');
+  L.push('.charsheet .coc-sheet .topbanner{ text-align:center; margin-bottom:16px; }');
+  L.push(`.charsheet .coc-sheet .topbanner img{ width:${cfg.size.top.w}px; height:${cfg.size.top.h}px; object-fit:contain; }`);
+  L.push('.charsheet .coc-sheet .accent{ color:var(--accent); }');
+  L.push(`.charsheet .coc-sheet .sec{ margin:${cfg.layout.sectionGap}px 0 8px; font-size:12px; color:${colHeader}; letter-spacing:2px; font-weight:700; border-bottom:${cfg.shape.underline}px solid var(--line); padding-bottom:4px; }`);
+  L.push('.charsheet .coc-sheet input,.charsheet .coc-sheet textarea{ background:transparent; border:none; color:var(--accent); font-family:inherit; box-sizing:border-box; }');
+  L.push('.charsheet .coc-sheet input[type=number]{ -moz-appearance:textfield; }');
+  L.push('.charsheet .coc-sheet input[type=number]::-webkit-inner-spin-button,.charsheet .coc-sheet input[type=number]::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }');
+  const boxBg = cfg.box.on ? rgbaOf(cfg.fg,.06) : 'transparent';
+  const boxBorder = cfg.box.on ? `1px solid ${rgbaOf(cfg.fg,.22)}` : '1px solid transparent';
+  const boxRad = (cfg.box.radius||0)+'px';
+  L.push('.charsheet .coc-sheet .top{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; }');
+  L.push(`.charsheet .coc-sheet .info{ flex:0 0 ${cfg.layout.infoWidth}%; display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 10px; align-items:center; align-content:start; background:${boxBg}; border:${boxBorder}; border-radius:${boxRad}; padding:12px 14px; }`);
+  L.push(`.charsheet .coc-sheet .info .k{ font-size:11px; opacity:.6; white-space:nowrap; color:${colLabel}; }`);
+  L.push('.charsheet .coc-sheet .info .v{ border-bottom:1px dotted var(--line); min-height:18px; min-width:0; }'); L.push(`.charsheet .coc-sheet .info .v input{ color:${colValue}; }`);
+  L.push('.charsheet .coc-sheet .info .v input{ width:100%; }');
+  L.push('.charsheet .coc-sheet .cards{ flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }');
+  L.push(`.charsheet .coc-sheet .scard{ background:${boxBg}; border:${boxBorder}; border-radius:${boxRad}; padding:8px 6px; text-align:center; min-width:0; }`);
+  L.push('.charsheet .coc-sheet .scard .tag,.charsheet .coc-sheet .scard .accent{ white-space:nowrap; }');
+  L.push('.charsheet .coc-sheet .scard .big input{ font-size:26px; font-weight:bold; text-align:center; width:50px; }');
+  L.push(`.charsheet .coc-sheet .winter{ text-align:center; font-family:'Nanum Myeongjo','Gowun Batang',serif; font-weight:800; letter-spacing:2px; font-size:26px; color:var(--accent); margin:18px 0; }`);
+  L.push('.charsheet .coc-sheet .chars{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; text-align:center; margin:14px 0; }');
+  L.push(`.charsheet .coc-sheet .chars .c .nm{ font-size:12px; color:${colLabel}; }`);
+  L.push('.charsheet .coc-sheet .chars .c .ic{ display:flex; gap:3px; justify-content:center; align-items:center; height:16px; }');
+  L.push(`.charsheet .coc-sheet .chars input[type=number]{ font-size:20px; font-weight:bold; text-align:center; width:100%; color:${colValue}; }`);
+  L.push(`.charsheet .coc-sheet .chars .c .hf{ font-size:11px; opacity:.7; display:flex; gap:3px; justify-content:center; color:${colHf}; }`);
+  L.push('.charsheet .coc-sheet .hfv{ width:22px; text-align:center; opacity:.85; }');
+  L.push(`.charsheet .coc-sheet .skills{ column-count:${cfg.layout.skillCols}; column-gap:24px; }`);
+  L.push('.charsheet .coc-sheet .skill{ display:flex; align-items:center; gap:6px; padding:2px 0; break-inside:avoid; }');
+  L.push(`.charsheet .coc-sheet .skill .nm{ flex:1; color:${colLabel}; }`);
+  L.push(`.charsheet .coc-sheet .skill input[type=number]{ width:34px; text-align:center; background:${colChip}; color:${colChipT}; border-radius:9px; padding:1px 0; flex:0 0 auto; }`);
+  L.push(`.charsheet .coc-sheet .skill .hf2{ font-size:10px; opacity:.62; display:flex; gap:1px; min-width:34px; justify-content:flex-end; color:${colHf}; }`);
+  L.push('.charsheet .coc-sheet .skill .hf2 .hfv{ width:16px; }');
+  L.push('.charsheet .coc-sheet fieldset.repeating_skills{ border:none; margin:0; padding:0; }');
+  L.push('.charsheet .coc-sheet fieldset.repeating_weapons{ border:none; margin:0; padding:0; }');
+  L.push('/* 추가 기능(반복 섹션)만 미리보기처럼 3열로 흐르게 (무기 섹션 제외) */');
+  L.push(`.charsheet .coc-sheet .repcontainer[data-groupname="repeating_skills"]{ column-count:${cfg.layout.skillCols}; column-gap:24px; }`);
+  L.push('.charsheet .coc-sheet .repcontainer[data-groupname="repeating_skills"] .repitem{ break-inside:avoid; -webkit-column-break-inside:avoid; page-break-inside:avoid; }');
+  L.push('.charsheet .coc-sheet .repcontainer[data-groupname="repeating_skills"] .skill .nm{ flex:1; min-width:0; }');
+  L.push('.charsheet .coc-sheet .wrow{ display:flex; gap:5px; align-items:center; margin:3px 0; }');
+  L.push('.charsheet .coc-sheet .wrow input{ flex:1; min-width:0; border-bottom:1px solid var(--line); }');
+  L.push('.charsheet .coc-sheet .wrow button{ flex:0 0 auto; background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:3px; font-size:11px; padding:2px 8px; cursor:pointer; }');
+  L.push('.charsheet .coc-sheet .repcontrol button{ background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:3px; font-size:11px; padding:2px 8px; margin:6px 6px 0 0; cursor:pointer; }');
+  L.push('.charsheet .coc-sheet table.weap{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:11px; }');
+  L.push(`.charsheet .coc-sheet table.weap th,.charsheet .coc-sheet table.weap td{ border:${cfg.weapBorder||0}px solid var(--line); padding:3px 5px; text-align:center; overflow:hidden; }`);
+  L.push('.charsheet .coc-sheet table.weap input{ width:100%; box-sizing:border-box; text-align:center; }');
+  L.push('.charsheet .coc-sheet table.weap th.wroll,.charsheet .coc-sheet table.weap td.wroll{ width:34px; }');
+  L.push('.charsheet .coc-sheet table.weap td.wroll{ text-align:center; }');
+  L.push('.charsheet .coc-sheet table.weap td.wdmg input{ width:48px; text-align:center; }');
+  L.push('.charsheet .coc-sheet table.weap td.wdmg span{ font-size:10px; opacity:.6; white-space:nowrap; }');
+  L.push('');
+  L.push('/* 굴림 아이콘 1·2 — 롤20 기본 버튼 스타일(흰 박스·그림자·강제 크기)을 !important로 제거 */');
+  L.push('.charsheet .coc-sheet button[type=roll].rollicon1,.charsheet .coc-sheet button[type=roll].rollicon2{ border:none !important; box-shadow:none !important; background-color:transparent !important; -webkit-appearance:none; appearance:none; width:auto !important; height:auto !important; min-width:0 !important; padding:1px 3px !important; margin:0 !important; line-height:1 !important; vertical-align:middle; cursor:pointer; color:var(--accent) !important; border-radius:3px; }');
+  L.push('/* 롤20 기본 d20 아이콘 제거 → ◆/이미지만 표시 (클릭 굴림은 유지) */');
+  L.push('.charsheet .coc-sheet button[type=roll]::before{ content:"" !important; }');
+  const _ic1=exportSrc('icon',cfg.iconImg), _ic2=exportSrc('icon2',cfg.iconImg2);
+  if(_ic1) L.push(`.charsheet .coc-sheet button[type=roll].rollicon1{ background-image:url('${_ic1}') !important; background-size:contain !important; background-repeat:no-repeat !important; background-position:center !important; width:${cfg.size.icon.w}px !important; height:${cfg.size.icon.h}px !important; padding:0 !important; text-indent:-9999px; overflow:hidden; }`);
+  else     L.push('.charsheet .coc-sheet button[type=roll].rollicon1{ background-image:none !important; font-size:13px !important; }');
+  if(_ic2) L.push(`.charsheet .coc-sheet button[type=roll].rollicon2{ background-image:url('${_ic2}') !important; background-size:contain !important; background-repeat:no-repeat !important; background-position:center !important; width:${cfg.size.icon2.w}px !important; height:${cfg.size.icon2.h}px !important; padding:0 !important; text-indent:-9999px; overflow:hidden; }`);
+  else     L.push('.charsheet .coc-sheet button[type=roll].rollicon2{ background-image:none !important; font-size:13px !important; }');
+  L.push('.charsheet .coc-sheet button[type=roll].rollicon1:hover,.charsheet .coc-sheet button[type=roll].rollicon2:hover{ background-color:rgba(46,110,145,.18) !important; }');
+  L.push(rollTemplateCss());
+  return L.join('\n');
+}
+
+function buildHtml(){
+  const V=cfg.values, L=[];
+  L.push('<!-- COC 7th 커스텀 시트 — 빌더 생성 HTML -->');
+  L.push('<div class="coc-sheet">');
+  const _top=exportSrc('top',cfg.topImg);
+  if(_top) L.push(`  <div class="topbanner"><img src="${_top}" alt=""></div>`);
+  L.push('  <div class="top">');
+  L.push('    <div class="info">');
+  INFO.forEach(([id,lab])=>{
+    const dv=(id==='move'||id==='db'||id==='build') ? ` value="${esc(cfg.values[id]??'')}"` : '';
+    L.push(`      <div class="k">${lab}</div><div class="v"><input type="text" name="attr_${id}"${dv}></div>`);
+  });
+  L.push('    </div>');
+  L.push('    <div class="cards">');
+  [['hp','체력','건강'],['mp','마력','평정심'],['san','이성','광기의 발작']].forEach(([k,lab,tag])=>{
+    L.push(`      <div class="scard"><div>${lab}</div>`+
+      `<div class="big"><input type="number" name="attr_${k}" value="${V[k+'_cur']}"></div>`+
+      `<div class="sub">/ <input type="number" name="attr_${k}_max" value="${V[k+'_max']}" style="width:42px;text-align:center"></div>`+
+      `<div class="accent">${tag}</div></div>`);
+  });
+  L.push('    </div>');
+  L.push('  </div>');
+  L.push(`  <div class="winter">${esc(cfg.winter)}</div>`);
+  L.push('  <div class="sec">능력치</div>');
+  L.push('  <div class="chars">');
+  CHARS.forEach(([id,nm])=>{
+    L.push(`    <div class="c"><div class="nm">${nm}</div>`+
+      `<input type="number" name="attr_${id}" value="${V[id]}">`+
+      `<div class="hf"><input class="hfv" type="text" name="attr_${id}_half" readonly> · <input class="hfv" type="text" name="attr_${id}_fifth" readonly></div>`+
+      `<div class="ic"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
+      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button></div></div>`);
+  });
+  L.push('  </div>');
+  L.push('  <div class="sec">기능</div>');
+  L.push('  <div class="skills">');
+  SKILLS.forEach(([id,nm])=>{
+    L.push(`    <div class="skill"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
+      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button>`+
+      `<span class="nm">${nm}</span><input type="number" name="attr_${id}" value="${V[id]}">`+
+      `<span class="hf2"><input class="hfv" type="text" name="attr_${id}_half" readonly>/<input class="hfv" type="text" name="attr_${id}_fifth" readonly></span></div>`);
+  });
+  cfg.customSkills.forEach((s,i)=>{
+    const id='customskill'+(i+1), nm=esc(s.name);
+    L.push(`    <div class="skill"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
+      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button>`+
+      `<span class="nm">${nm}</span><input type="number" name="attr_${id}" value="${esc(s.value)}">`+
+      `<span class="hf2"><input class="hfv" type="text" name="attr_${id}_half" readonly>/<input class="hfv" type="text" name="attr_${id}_fifth" readonly></span></div>`);
+  });
+  L.push('  </div>');
+  // 플레이어가 직접 기능을 추가할 수 있는 repeating 섹션 (+Add / Modify 자동 생성)
+  L.push('  <div class="accent" style="margin-top:10px">기능 추가</div>');
+  L.push('  <fieldset class="repeating_skills">');
+  L.push('    <div class="skill">'+
+    '<button type="roll" class="rollicon1" name="roll_skill" value="&{template:coc} {{name=@{skillname}}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[1d100]]}}">◆</button>'+
+    '<button type="roll" class="rollicon2" name="roll_skill_bonus" value="&{template:coc} {{name=@{skillname} (보너스/페널티)}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[?{보너스·페널티|보너스,2d100kl1|페널티,2d100kh1}]]}}">◆</button>'+
+    '<input type="text" class="nm" name="attr_skillname" placeholder="기능 이름" style="flex:1">'+
+    '<input type="number" name="attr_skill" value="0"></div>');
+  L.push('  </fieldset>');
+  L.push('  <div class="sec">무기 / 전투</div>');
+  L.push('  <table class="weap"><tr><th class="wroll"></th><th>무기</th><th>기능</th><th>피해</th><th>사거리</th><th>공격횟수</th><th>탄약</th><th>고장</th></tr>'+
+    '<tr><td class="wroll"><button type="roll" class="rollicon1" name="roll_weapon1" value="'+weaponRollVal('weapon1','weapon1_skill','weapon1_dmg')+'">◆</button></td>'+
+    '<td><input type="text" name="attr_weapon1" value="비무장"></td>'+
+    '<td><input type="number" name="attr_weapon1_skill" value="25"></td>'+
+    '<td class="wdmg"><input type="text" name="attr_weapon1_dmg" value="1d3"> <span>+ db</span></td>'+
+    '<td><input type="text" name="attr_weapon1_range" value="접촉"></td>'+
+    '<td><input type="text" name="attr_weapon1_atk" value="1"></td><td><input type="text" name="attr_weapon1_ammo"></td>'+
+    '<td><input type="text" name="attr_weapon1_malf"></td></tr>'+
+    cfg.customWeapons.map((w,i)=>{
+      const id='cweapon'+(i+1);
+      return `<tr>`+
+        `<td class="wroll"><button type="roll" class="rollicon1" name="roll_${id}" value="${weaponRollVal(id+'_name',id+'_skill',id+'_dmg')}">◆</button></td>`+
+        `<td><input type="text" name="attr_${id}_name" value="${esc(w.name||'')}"></td>`+
+        `<td><input type="number" name="attr_${id}_skill" value="${esc(w.skill||'')}"></td>`+
+        `<td class="wdmg"><input type="text" name="attr_${id}_dmg" value="${esc(w.dmg||'')}"> <span>+ db</span></td>`+
+        `<td><input type="text" name="attr_${id}_range" value="${esc(w.range||'')}"></td>`+
+        `<td><input type="text" name="attr_${id}_atk" value="${esc(w.atk||'')}"></td>`+
+        `<td><input type="text" name="attr_${id}_ammo" value="${esc(w.ammo||'')}"></td>`+
+        `<td><input type="text" name="attr_${id}_malf" value="${esc(w.malf||'')}"></td></tr>`;
+    }).join('')+
+    '</table>');
+  // 플레이어가 직접 무기를 추가할 수 있는 repeating 섹션 (+Add / Modify 자동 생성)
+  L.push('  <div class="accent" style="margin-top:10px">무기 추가</div>');
+  L.push('  <fieldset class="repeating_weapons">');
+  L.push('    <div class="wrow">'+
+    '<button type="roll" class="rollicon1" name="roll_weapon" value="&{template:coc} {{name=@{weaponname}}} {{success=[[@{weaponskill}]]}} {{hard=[[floor(@{weaponskill}/2)]]}} {{extreme=[[floor(@{weaponskill}/5)]]}} {{roll1=[[1d100]]}} {{damage=[[@{weapondamage}@{db_roll}]]}}">◆</button>'+
+    '<input type="text" name="attr_weaponname" placeholder="무기">'+
+    '<input type="number" name="attr_weaponskill" placeholder="기능%">'+
+    '<input type="text" name="attr_weapondamage" placeholder="피해(예 1d6)">'+
+    '<input type="text" name="attr_weaponrange" placeholder="사거리">'+
+    '<input type="text" name="attr_weaponattacks" placeholder="공격횟수">'+
+    '<input type="text" name="attr_weaponammo" placeholder="탄약">'+
+    '<input type="text" name="attr_weaponmalf" placeholder="고장"></div>');
+  L.push('  </fieldset>');
+  L.push('  <div class="sec">기타</div>');
+  L.push('  <textarea name="attr_notes" style="width:100%;min-height:60px;border:1px solid var(--line)"></textarea>');
+  L.push('</div>');
+  L.push('');
+  L.push('<script type="text/worker">');
+  CHARS.map(c=>c[0]).concat(SKILLS.map(s=>s[0])).forEach(a=>{
+    L.push(`on("change:${a}", function(e){ var v=parseInt(e.newValue)||0; setAttrs({ ${a}_half:Math.floor(v/2), ${a}_fifth:Math.floor(v/5) }); });`);
+  });
+  cfg.customSkills.forEach((s,i)=>{
+    const a='customskill'+(i+1);
+    L.push(`on("change:${a}", function(e){ var v=parseInt(e.newValue)||0; setAttrs({ ${a}_half:Math.floor(v/2), ${a}_fifth:Math.floor(v/5) }); });`);
+  });
+  L.push('on("change:repeating_skills:skill", function(e){ var v=parseInt(e.newValue)||0; setAttrs({ "repeating_skills_skill_half":Math.floor(v/2), "repeating_skills_skill_fifth":Math.floor(v/5) }); });');
+  L.push('on("change:dex", function(e){ var v=parseInt(e.newValue)||0; setAttrs({ dodge:Math.floor(v/2) }); });');
+  L.push('on("change:edu", function(e){ setAttrs({ language_own:parseInt(e.newValue)||0 }); });');
+  L.push('// 파생 수치 자동계산');
+  L.push('on("change:con change:siz", function(){ getAttrs(["con","siz"], function(v){ setAttrs({ hp_max: Math.floor(((parseInt(v.con)||0)+(parseInt(v.siz)||0))/10) }); }); });');
+  L.push('on("change:pow", function(e){ setAttrs({ mp_max: Math.floor((parseInt(e.newValue)||0)/5) }); });');
+  L.push('on("change:str change:siz change:dex", function(){ getAttrs(["str","siz","dex"], function(v){');
+  L.push('  var str=parseInt(v.str)||0, siz=parseInt(v.siz)||0, dex=parseInt(v.dex)||0;');
+  L.push('  var mov=(str<siz&&dex<siz)?7:((str>siz&&dex>siz)?9:8);');
+  L.push('  var ss=str+siz, db, build;');
+  L.push('  if(ss<=64){db="−2";build=-2;} else if(ss<=84){db="−1";build=-1;} else if(ss<=124){db="0";build=0;}');
+  L.push('  else if(ss<=164){db="+1D4";build=1;} else if(ss<=204){db="+1D6";build=2;}');
+  L.push('  else { var t=Math.floor((ss-205)/80); db="+"+(2+t)+"D6"; build=3+t; }');
+  L.push('  var dbRoll = db==="0" ? "" : db.replace("−","-").replace("D","d");');
+  L.push('  setAttrs({ move:mov, db:db, db_roll:dbRoll, build:build });');
+  L.push('}); });');
+  // 시트를 처음 열 때 모든 1/2·1/5 및 파생 수치를 한 번 계산
+  const _allIds = JSON.stringify(CHARS.map(c=>c[0]).concat(SKILLS.map(s=>s[0])).concat(cfg.customSkills.map((s,i)=>'customskill'+(i+1))));
+  L.push('// 시트 최초 오픈 시 일괄 계산');
+  L.push(`on("sheet:opened", function(){`);
+  L.push(`  var ids=${_allIds};`);
+  L.push(`  getAttrs(ids.concat(["str","siz","con","pow","dex","edu"]), function(v){`);
+  L.push(`    var out={}; ids.forEach(function(a){ var n=parseInt(v[a])||0; out[a+"_half"]=Math.floor(n/2); out[a+"_fifth"]=Math.floor(n/5); });`);
+  L.push(`    var str=parseInt(v.str)||0,siz=parseInt(v.siz)||0,con=parseInt(v.con)||0,pow=parseInt(v.pow)||0,dex=parseInt(v.dex)||0,edu=parseInt(v.edu)||0;`);
+  L.push(`    out.hp_max=Math.floor((con+siz)/10); out.mp_max=Math.floor(pow/5); out.dodge=Math.floor(dex/2); out.language_own=edu;`);
+  L.push(`    out.move=(str<siz&&dex<siz)?7:((str>siz&&dex>siz)?9:8);`);
+  L.push(`    var ss=str+siz,db,build; if(ss<=64){db="−2";build=-2;}else if(ss<=84){db="−1";build=-1;}else if(ss<=124){db="0";build=0;}else if(ss<=164){db="+1D4";build=1;}else if(ss<=204){db="+1D6";build=2;}else{var t=Math.floor((ss-205)/80);db="+"+(2+t)+"D6";build=3+t;}`);
+  L.push(`    out.db=db; out.db_roll=(db==="0"?"":db.replace("−","-").replace("D","d")); out.build=build; setAttrs(out);`);
+  L.push(`  });`);
+  L.push(`});`);
+  L.push('<\/script>');
+  L.push('');
+  L.push(rollTemplateHtml());
+  return L.join('\n');
+}
+
+document.getElementById('bExport').onclick=()=> document.querySelector('[data-tab=export]').click();
+document.getElementById('prevHtml').onclick=()=>{ document.getElementById('exOut').value=buildHtml(); };
+document.getElementById('prevCss').onclick=()=>{ document.getElementById('exOut').value=buildCss(); };
+document.getElementById('dlBoth').onclick=()=>{
+  download('sheet.html', buildHtml(), 'text/html');
+  setTimeout(()=>download('sheet.css', buildCss(), 'text/css'), 250);
+};
+
+function download(name,text,mime){
+  const b=new Blob([text],{type:mime}), u=URL.createObjectURL(b);
+  const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+}
+
+buildSheet();
+renderRollCards();
+applyRollDesign();
+</script>
+</body>
+</html>
