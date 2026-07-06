@@ -6,7 +6,7 @@
 <title>COC 7th · Roll20 시트 빌더</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Dancing+Script:wght@600&family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Gowun+Dodum&family=Song+Myung&family=Do+Hyeon&family=Jua&family=Black+Han+Sans&family=Gaegu:wght@400;700&family=Nanum+Pen+Script&family=Gugi&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
@@ -14,6 +14,7 @@
     --bg:#fbfbfb; --panel:#ffffff; --panel-2:#f4f4f4; --panel-3:#ededed;
     --line:#e4e4e4; --line-2:#d6d6d6;
     --ink:#161616; --ink-2:#3d3d3d; --dim:#8d8d8d;
+    --accent-ui:#2e6e91; --accent-soft:#eef4f8;
     --ui:'Inter',system-ui,sans-serif;
     --r:6px;
   }
@@ -87,18 +88,18 @@
   .sheet .pad{ padding:var(--s-pad,26px); }
 
   /* 상단 배너/로고 이미지 */
-  .topbanner{ text-align:center; margin:0 auto 16px; max-width:100%; overflow:hidden; }
-  .topbanner img{ width:100%; height:100%; object-fit:contain; display:block; }
+  .topbanner{ margin:0 auto 16px; max-width:100%; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .topbanner img{ max-width:100%; max-height:100%; width:auto; height:auto; display:block; }
   .topbanner.empty{ border:1px dashed var(--s-line); border-radius:4px; padding:18px;
     font-size:12px; opacity:.4; }
 
   .top{ display:flex; gap:16px; align-items:stretch; justify-content:space-between; }
   .cards{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:8px; }
-  .scard{ background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius);
+  .scard{ font-family:var(--f-top,inherit); color:var(--fc-top,inherit); background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius);
     padding:10px 8px; text-align:center; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .scard .lab{ display:inline-block; background:var(--s-chip); color:var(--s-chiptext); border-radius:11px; padding:2px 12px; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:4px; }
   .scard .cm{ display:flex; align-items:baseline; justify-content:center; gap:6px; margin:5px 0 3px; }
-  .scard .cm .cur{ font-size:26px; font-weight:700; line-height:1; outline:none; color:var(--s-value); }
+  .scard .cm .cur{ font-size:26px; font-weight:700; line-height:1; outline:none; color:var(--fc-top, var(--s-value)); }
   .scard .cm .div{ font-size:18px; opacity:.3; }
   .scard .cm .mx{ font-size:16px; opacity:.6; }
   .scard .tag{ display:inline-block; margin-top:4px; font-size:10px; padding:2px 7px;
@@ -109,27 +110,27 @@
   .scard .cardroll{ display:flex; gap:4px; justify-content:center; align-items:center; min-height:15px; margin-top:5px; color:var(--s-accent); font-size:13px; line-height:1; cursor:pointer; }
   .madrow .madstart{ opacity:.8; }
   .madrow .madstart .ss{ font-weight:700; color:var(--s-value); outline:none; padding:0 4px; }
-  .info{ flex:0 0 var(--s-infow,44%); background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius); padding:12px 16px; }
+  .info{ font-family:var(--f-top,inherit); color:var(--fc-top,inherit); flex:0 0 var(--s-infow,44%); background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius); padding:12px 16px; }
   .info .row{ display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 10px; align-items:center; }
   .info .k{ font-size:11px; opacity:.6; color:var(--s-label); }
   .info .v{ font-size:13px; border-bottom:1px dotted var(--s-line); min-height:18px; color:var(--s-value); }
 
-  .winter{ text-align:center; margin:22px 0 6px; font-family:'Nanum Myeongjo','Gowun Batang',serif;
+  .winter{ text-align:center; margin:22px 0 6px; font-family:var(--f-pair,'Nanum Myeongjo','Gowun Batang',serif);
     font-weight:800; letter-spacing:2px;
-    font-size:30px; color:var(--s-accent); position:relative; }
+    font-size:30px; color:var(--fc-pair, var(--s-accent)); position:relative; }
   .winter::before,.winter::after{ content:""; position:absolute; top:50%; width:26%; height:1px; background:var(--s-line); }
   .winter::before{ left:8%; } .winter::after{ right:8%; }
 
-  .chars{ display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin:14px 0; text-align:center; }
-  .chars .c .nm{ font-size:12px; opacity:.85; color:var(--s-label); }
+  .chars{ font-family:var(--f-chars,inherit); color:var(--fc-chars,inherit); display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin:14px 0; text-align:center; }
+  .chars .c .nm{ font-size:12px; opacity:.85; color:var(--fc-chars, var(--s-label)); }
   .chars .c .vv{ display:inline-block; box-sizing:border-box; width:44px; background:var(--s-chip); color:var(--s-chiptext); border-radius:12px; padding:2px 0; font-size:18px; font-weight:700; margin:3px 0; outline:none; text-align:center; }
   .chars .c .hf{ font-size:11px; opacity:.7; margin-bottom:2px; color:var(--s-hfcol); }
   .chars .c .ic{ height:18px; display:flex; gap:4px; justify-content:center; align-items:center; }
 
-  .skills{ column-count:var(--s-skillcols,3); column-gap:26px; }
+  .skills{ font-family:var(--f-skills,inherit); color:var(--fc-skills,inherit); column-count:var(--s-skillcols,3); column-gap:26px; }
   .skills .skill:nth-child(even){ background:var(--s-zebra,transparent); border-radius:3px; }
   .skill{ display:flex; align-items:center; gap:7px; break-inside:avoid; padding:2px 0; font-size:12px; }
-  .skill .nm{ flex:1; opacity:.9; color:var(--s-label); }
+  .skill .nm{ flex:1; opacity:.9; color:var(--fc-skills, var(--s-label)); }
   .skill .val{ box-sizing:border-box; width:34px; height:18px; padding:1px 0; border-radius:9px; background:var(--s-chip);
     color:var(--s-chiptext); text-align:center; font-size:11px; line-height:16px; outline:none; flex:0 0 auto; }
   .skill .hf2{ font-size:10px; opacity:.62; min-width:30px; text-align:right; color:var(--s-hfcol); }
@@ -158,9 +159,9 @@
 
   .wtitle{ margin:var(--s-secgap,22px) 0 8px; font-size:12px; color:var(--s-header); letter-spacing:2px; font-weight:700;
     border-bottom:var(--s-underline,1px) solid var(--s-line); padding-bottom:4px; }
-  table.weap{ width:100%; border-collapse:collapse; font-size:11px; }
+  table.weap{ font-family:var(--f-weap,inherit); color:var(--fc-weap,inherit); width:100%; border-collapse:collapse; font-size:11px; }
   table.weap th,table.weap td{ border:var(--s-weapb,1px) solid var(--s-wline,var(--s-line)); padding:4px 6px; text-align:center; opacity:.9; }
-  table.weap td{ color:var(--s-wtext,inherit); }
+  table.weap td{ color:var(--s-wtext, var(--fc-weap, inherit)); }
   table.weap th{ background:var(--s-whbg,transparent); color:var(--s-whfg,var(--s-header)); }
   table.weap .wroll{ width:30px; color:var(--s-accent); }
   table.weap .wdmg .dbl{ font-size:10px; opacity:.55; }
@@ -184,25 +185,42 @@
   /* ── 오른쪽: 제작탭 ── */
   aside{ flex:0 0 360px; width:360px; background:var(--panel); border-left:1px solid var(--line);
     display:flex; flex-direction:column; min-height:0; }
-  .tabs{ display:flex; border-bottom:1px solid var(--line); }
-  .tabs button{ flex:1; padding:12px 4px; font-size:12.5px; color:var(--dim); background:none;
+  .tabs{ display:flex; border-bottom:1px solid var(--line); background:var(--panel); position:sticky; top:0; z-index:5; }
+  .tabs button{ flex:1; padding:13px 4px; font-size:12.5px; color:var(--dim); background:none;
     border:none; border-bottom:2px solid transparent; cursor:pointer; transition:.15s; }
-  .tabs button:hover{ color:var(--ink); }
-  .tabs button.on{ color:var(--ink); border-bottom-color:var(--ink); font-weight:600; }
+  .tabs button:hover{ color:var(--ink); background:var(--panel-2); }
+  .tabs button.on{ color:var(--accent-ui); border-bottom-color:var(--accent-ui); font-weight:700; }
   .panel{ flex:1; overflow:auto; padding:18px; display:none; }
   .panel.on{ display:block; }
-  .panel h3{ font-size:13px; margin:0 0 3px; font-weight:600; }
-  .panel .desc{ font-size:11.5px; color:var(--dim); margin:0 0 14px; line-height:1.55; }
-  .glabel{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); font-weight:700;
-    margin:22px 0 9px; padding:0 0 0 9px; border-left:3px solid var(--ink); line-height:1.3; }
+  .panel h3{ font-size:14px; margin:0 0 4px; font-weight:700; color:var(--ink); letter-spacing:.2px; }
+  .panel .desc{ font-size:11.5px; color:var(--dim); margin:0 0 16px; padding-bottom:13px; line-height:1.55; border-bottom:1px solid var(--line); }
+  .glabel{ font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--ink); font-weight:700;
+    margin:24px 0 11px; padding:8px 12px; line-height:1.3;
+    background:var(--accent-soft); border:1px solid var(--line); border-left:3px solid var(--accent-ui); border-radius:8px; }
+  .panel h3 + .glabel, .panel .desc + .glabel{ margin-top:4px; }
+  .acc-head{ cursor:pointer; user-select:none; position:relative; padding-right:30px; transition:background .12s; }
+  .acc-head:hover{ filter:brightness(.98); }
+  .acc-head::after{ content:'▾'; position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    font-size:11px; color:var(--accent-ui); transition:transform .15s; }
+  .acc-head.collapsed::after{ transform:translateY(-50%) rotate(-90deg); }
+  .acc-body.collapsed{ display:none; }
   .field{ background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:9px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
   .field label{ display:block; font-size:11.5px; color:var(--ink-2); margin-bottom:4px; }
   .field input[type=text],.field input[type=url]{ width:100%; padding:8px 10px; font-size:12.5px;
     border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); }
   .field input:focus{ outline:none; border-color:var(--ink); }
   .field .hint{ font-size:10.5px; color:var(--dim); margin-top:3px; }
+  .hint{ font-size:10.8px; color:var(--ink-2); line-height:1.55; background:var(--accent-soft);
+    border:1px solid var(--line); border-left:3px solid var(--accent-ui); border-radius:8px; padding:9px 11px; margin:2px 0 12px; }
+  .field .hint, .ghbox .hint{ background:none; border:none; padding:0; margin-top:3px; border-radius:0; }
 
   .colorrow{ display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin-bottom:8px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  select.fontsel{ flex:0 0 200px; font-family:var(--ui); font-size:12px; padding:6px 8px; border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); cursor:pointer; }
+  .fontrow{ flex-wrap:wrap; }
+  .fontrow select.fontsel{ flex:0 0 150px; }
+  .fontcol{ flex:0 0 auto; width:34px; height:30px; padding:0; border:1px solid var(--line-2); border-radius:var(--r); background:#fff; cursor:pointer; }
+  .fontcolrst{ flex:0 0 auto; font-size:11px; padding:6px 9px; border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); cursor:pointer; }
+  .fontcolrst:hover{ background:var(--panel-2); }
   .colorrow label{ flex:1; font-size:12px; }
   .colorrow input[type=color]{ width:42px; height:30px; border:1px solid var(--line-2);
     border-radius:var(--r); background:#fff; cursor:pointer; padding:2px; }
@@ -295,6 +313,7 @@
     <div class="tabs">
       <button class="on" data-tab="img">이미지</button>
       <button data-tab="color">색상</button>
+      <button data-tab="font">폰트</button>
       <button data-tab="layout">레이아웃</button>
       <button data-tab="roll">롤 템플릿</button>
       <button data-tab="export">내보내기</button>
@@ -436,6 +455,14 @@
       <div class="colorrow"><label>줄무늬 색</label><input type="color" id="zebra-color"><input class="hex" id="zebra-color-h"></div>
     </div>
 
+    <!-- 폰트 탭 -->
+    <div class="panel" id="p-font">
+      <h3>폰트</h3>
+      <p class="desc">시트 구역별로 글꼴을 고를 수 있습니다. ‘기본’을 고르면 시트 기본 글꼴을 씁니다. 미리보기·내보내기(Roll20) 모두 반영됩니다.</p>
+      <div id="fontRows"></div>
+      <div class="hint">한글이 지원되는 웹폰트만 골라 담았습니다. 손글씨·굵은 폰트는 큰 제목(페어네임)에 잘 어울립니다. Roll20에서는 글꼴이 웹에서 로드되므로 온라인 상태에서 표시됩니다.</div>
+    </div>
+
     <!-- 레이아웃 탭 -->
     <div class="panel" id="p-layout">
       <h3>제목 &amp; 기본값</h3>
@@ -569,6 +596,8 @@ const cfg = {
   layout:{ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 },
   shape:{ borderW:1, radius:8, borderColor:'', underline:1 },
   col:{ header:'', label:'', value:'', chip:'', chipText:'', hf:'' },
+  fonts:{ top:'', pair:'', chars:'', skills:'', weap:'' },
+  fontColors:{ top:'', pair:'', chars:'', skills:'', weap:'' },
   gh:{ user:'', repo:'', branch:'main', folder:'images' },
   uploads:{},
   topImg:'', bgImg:'', topBgImg:'', midBgImg:'', botBgImg:'', iconImg:'', iconImg2:'', rollImg:'', values:{}, customSkills:[], customWeapons:[],
@@ -581,6 +610,42 @@ CHARS.forEach(([id,,v])=> cfg.values[id]=v);
 SKILLS.forEach(([id,,v])=> cfg.values[id]=v);
 cfg.values.hp_cur=10; cfg.values.hp_max=10; cfg.values.mp_cur=10; cfg.values.mp_max=10;
 cfg.values.san_cur=40; cfg.values.san_max=99; cfg.values.san_start=99; cfg.values.luck=50; cfg.values.luck_max=99;
+
+/* ===== 선택 가능한 폰트 목록 (id → CSS 스택 · fontsource 슬러그 · 굵기) ===== */
+const FONTS = [
+  { id:'',              label:'기본 (시트 기본값)',        css:'' },
+  { id:'notoserifkr',   label:'본명조 (Noto Serif KR)',    css:"'Noto Serif KR', serif",            fs:'noto-serif-kr', w:[400,700] },
+  { id:'notosanskr',    label:'본고딕 (Noto Sans KR)',     css:"'Noto Sans KR', sans-serif",         fs:'noto-sans-kr',  w:[400,700] },
+  { id:'nanummyeongjo', label:'나눔명조',                   css:"'Nanum Myeongjo', serif",            fs:'nanum-myeongjo',w:[400,800] },
+  { id:'nanumgothic',   label:'나눔고딕',                   css:"'Nanum Gothic', sans-serif",         fs:'nanum-gothic',  w:[400,700] },
+  { id:'gowunbatang',   label:'고운바탕',                   css:"'Gowun Batang', serif",              fs:'gowun-batang',  w:[400,700] },
+  { id:'gowundodum',    label:'고운돋움',                   css:"'Gowun Dodum', sans-serif",          fs:'gowun-dodum',   w:[400] },
+  { id:'songmyung',     label:'송명 (Song Myung)',         css:"'Song Myung', serif",                fs:'song-myung',    w:[400] },
+  { id:'dohyeon',       label:'도현 (Do Hyeon)',           css:"'Do Hyeon', sans-serif",             fs:'do-hyeon',      w:[400] },
+  { id:'jua',           label:'주아 (Jua)',                css:"'Jua', sans-serif",                  fs:'jua',           w:[400] },
+  { id:'blackhansans',  label:'검은고딕 (Black Han Sans)', css:"'Black Han Sans', sans-serif",       fs:'black-han-sans',w:[400] },
+  { id:'gaegu',         label:'개구 (손글씨)',              css:"'Gaegu', cursive",                   fs:'gaegu',         w:[400,700] },
+  { id:'nanumpen',      label:'나눔손글씨 펜',              css:"'Nanum Pen Script', cursive",        fs:'nanum-pen-script',w:[400] },
+  { id:'gugi',          label:'구기 (Gugi)',               css:"'Gugi', cursive",                    fs:'gugi',          w:[400] }
+];
+const FONT_TARGETS = [
+  ['top',   '이름·직업·체력 등 (상단 정보/카드)'],
+  ['pair',  '페어네임 (가운데 문구)'],
+  ['chars', '능력치'],
+  ['skills','기능'],
+  ['weap',  '무기 / 전투']
+];
+function fontById(id){ return FONTS.find(f=>f.id===id) || FONTS[0]; }
+function fontCss(id){ return fontById(id).css || ''; }
+function applyFonts(){
+  const s=document.getElementById('sheet'); if(!s) return;
+  const map={ top:'--f-top', pair:'--f-pair', chars:'--f-chars', skills:'--f-skills', weap:'--f-weap' };
+  const F=cfg.fonts||{};
+  for(const k in map){ const css=fontCss(F[k]); if(css) s.style.setProperty(map[k],css); else s.style.removeProperty(map[k]); }
+  const cmap={ top:'--fc-top', pair:'--fc-pair', chars:'--fc-chars', skills:'--fc-skills', weap:'--fc-weap' };
+  const C=cfg.fontColors||{};
+  for(const k in cmap){ const v=C[k]; if(v) s.style.setProperty(cmap[k],v); else s.style.removeProperty(cmap[k]); }
+}
 
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -647,7 +712,7 @@ function buildSheet(){
      '</div></div>'+
      '</div>';
   pad.innerHTML=h;
-  bindEditable(); applyTheme(); applyLayout(); applyImages(); refreshComputed();
+  bindEditable(); applyTheme(); applyLayout(); applyImages(); refreshComputed(); applyFonts();
 }
 function scard(lab,key,tag){
   const dm=(key==='hp'||key==='mp');
@@ -887,6 +952,36 @@ document.querySelectorAll('.tabs button').forEach(b=> b.onclick=()=>{
   document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='p-'+b.dataset.tab));
 });
+
+/* ===== 폰트 선택 UI ===== */
+(function(){
+  const host=document.getElementById('fontRows'); if(!host) return;
+  const opts=FONTS.map(f=>`<option value="${f.id}">${f.label}</option>`).join('');
+  host.innerHTML = FONT_TARGETS.map(([k,label])=>
+    `<div class="colorrow fontrow"><label style="flex:1">${label}</label>`+
+    `<select class="fontsel" data-fk="${k}">${opts}</select>`+
+    `<input type="color" class="fontcol" data-fk="${k}" title="글자색">`+
+    `<button type="button" class="fontcolrst" data-fk="${k}" title="글자색 기본값">기본색</button></div>`
+  ).join('');
+  host.querySelectorAll('.fontsel').forEach(sel=>{
+    const k=sel.dataset.fk;
+    sel.value=(cfg.fonts&&cfg.fonts[k])||'';
+    sel.addEventListener('change',()=>{ if(!cfg.fonts) cfg.fonts={}; cfg.fonts[k]=sel.value; applyFonts(); });
+  });
+  host.querySelectorAll('.fontcol').forEach(ci=>{
+    const k=ci.dataset.fk;
+    ci.value=(cfg.fontColors&&cfg.fontColors[k])||cfg.fg;
+    ci.addEventListener('input',()=>{ if(!cfg.fontColors) cfg.fontColors={}; cfg.fontColors[k]=ci.value; applyFonts(); });
+  });
+  host.querySelectorAll('.fontcolrst').forEach(btn=>{
+    const k=btn.dataset.fk;
+    btn.addEventListener('click',()=>{ if(!cfg.fontColors) cfg.fontColors={}; cfg.fontColors[k]=''; const ci=host.querySelector(`.fontcol[data-fk="${k}"]`); if(ci) ci.value=cfg.fg; applyFonts(); });
+  });
+})();
+function syncFontSelects(){
+  document.querySelectorAll('.fontsel').forEach(sel=>{ sel.value=(cfg.fonts&&cfg.fonts[sel.dataset.fk])||''; });
+  document.querySelectorAll('.fontcol').forEach(ci=>{ ci.value=(cfg.fontColors&&cfg.fontColors[ci.dataset.fk])||cfg.fg; });
+}
 
 document.getElementById('img-top').addEventListener('input',e=>{ cfg.topImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-bg').addEventListener('input',e=>{ cfg.bgImg=e.target.value.trim(); applyImages(); });
@@ -1228,6 +1323,9 @@ function syncInputs(){
   cfg.layout = Object.assign({ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 }, cfg.layout||{});
   cfg.shape = Object.assign({ borderW:1, radius:8, borderColor:'', underline:1 }, cfg.shape||{});
   cfg.col = Object.assign({ header:'', label:'', value:'', chip:'', chipText:'', hf:'' }, cfg.col||{});
+  cfg.fonts = Object.assign({ top:'', pair:'', chars:'', skills:'', weap:'' }, cfg.fonts||{});
+  cfg.fontColors = Object.assign({ top:'', pair:'', chars:'', skills:'', weap:'' }, cfg.fontColors||{});
+  if(typeof syncFontSelects==='function') syncFontSelects();
   ['bd-w','bd-rad','bd-ul'].forEach(id=>{ const k={'bd-w':'borderW','bd-rad':'radius','bd-ul':'underline'}[id]; const r=document.getElementById(id), n=document.getElementById(id+'-n'); if(r){ r.value=cfg.shape[k]; n.value=cfg.shape[k]; } });
   (function(){ const bc=document.getElementById('bd-color'); if(bc){ const v=cfg.shape.borderColor||cfg.fg; bc.value=v; document.getElementById('bd-color-h').value=v; } })();
   [['cg-header','header',cfg.accent],['cg-label','label',cfg.fg],['cg-value','value',cfg.accent],['cg-chip','chip',cfg.accent],['cg-chiptext','chipText',contrastOf(cfg.col.chip||cfg.accent)],['cg-hf','hf',cfg.fg]].forEach(([id,k,fb])=>{ const p=document.getElementById(id); if(p){ const v=cfg.col[k]||fb; p.value=v; document.getElementById(id+'-h').value=v; } });
@@ -1398,14 +1496,25 @@ function rollTemplateCss(){
   ].join('\n');
 }
 function fontFaceCss(){
-  return [
+  const L=[
 '/* 웹폰트 — Roll20에서도 빌더와 동일한 폰트로 표시 (fontsource CDN) */',
 "@font-face{ font-family:'Gowun Batang'; font-weight:400; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang/files/gowun-batang-korean-400-normal.woff2') format('woff2'); }",
 "@font-face{ font-family:'Gowun Batang'; font-weight:700; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/gowun-batang/files/gowun-batang-korean-700-normal.woff2') format('woff2'); }",
 "@font-face{ font-family:'Nanum Myeongjo'; font-weight:400; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/nanum-myeongjo/files/nanum-myeongjo-korean-400-normal.woff2') format('woff2'); }",
-"@font-face{ font-family:'Nanum Myeongjo'; font-weight:800; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/nanum-myeongjo/files/nanum-myeongjo-korean-800-normal.woff2') format('woff2'); }",
-''
-  ].join('\n');
+"@font-face{ font-family:'Nanum Myeongjo'; font-weight:800; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/nanum-myeongjo/files/nanum-myeongjo-korean-800-normal.woff2') format('woff2'); }"
+  ];
+  const done=new Set(['gowun-batang|400','gowun-batang|700','nanum-myeongjo|400','nanum-myeongjo|800']);
+  const chosen=[...new Set(Object.values(cfg.fonts||{}).filter(Boolean))];
+  chosen.forEach(id=>{
+    const f=fontById(id); if(!f.fs) return;
+    const fam=f.css.split(',')[0].trim();
+    (f.w||[400]).forEach(w=>{
+      const key=f.fs+'|'+w; if(done.has(key)) return; done.add(key);
+      L.push(`@font-face{ font-family:${fam}; font-weight:${w}; font-display:swap; src:url('https://cdn.jsdelivr.net/npm/@fontsource/${f.fs}/files/${f.fs}-korean-${w}-normal.woff2') format('woff2'); }`);
+    });
+  });
+  L.push('');
+  return L.join('\n');
 }
 function buildCss(){
   const L=[fontFaceCss()];
@@ -1431,8 +1540,8 @@ function buildCss(){
   }
   L.push(`  color:var(--fg); font-family:'Gowun Batang',serif; font-size:13px; padding:${cfg.layout.padding}px; width:100%; max-width:${cfg.layout.width}px; box-sizing:border-box; border:${cfg.shape.borderW}px solid ${edge}; border-radius:${cfg.shape.radius}px;`);
   L.push('}');
-  L.push(`.charsheet .coc-sheet .topbanner{ text-align:center; margin:0 auto 16px; width:${cfg.size.top.w}px; height:${cfg.size.top.h}px; max-width:100%; overflow:hidden; }`);
-  L.push('.charsheet .coc-sheet .topbanner img{ width:100%; height:100%; object-fit:contain; display:block; }');
+  L.push(`.charsheet .coc-sheet .topbanner{ margin:0 auto 16px; width:${cfg.size.top.w}px; height:${cfg.size.top.h}px; max-width:100%; overflow:hidden; display:flex; align-items:center; justify-content:center; }`);
+  L.push('.charsheet .coc-sheet .topbanner img{ max-width:100%; max-height:100%; width:auto; height:auto; display:block; }');
   L.push('.charsheet .coc-sheet .accent{ color:var(--accent); }');
   L.push(`.charsheet .coc-sheet .sec{ margin:${cfg.layout.sectionGap}px 0 8px; font-size:12px; color:${colHeader}; letter-spacing:2px; font-weight:700; border-bottom:${cfg.shape.underline}px solid var(--line); padding-bottom:4px; }`);
   L.push('.charsheet .coc-sheet input,.charsheet .coc-sheet textarea{ background:transparent; border:none; color:var(--accent); font-family:inherit; box-sizing:border-box; }');
@@ -1527,6 +1636,20 @@ function buildCss(){
   L.push('.charsheet .coc-sheet .notes .bfield.wide{ grid-column:1 / -1; }');
   L.push(`.charsheet .coc-sheet .notes .bfield label{ display:block; font-size:11px; font-weight:bold; color:${colHeader}; letter-spacing:.5px; margin-bottom:3px; }`);
   L.push(`.charsheet .coc-sheet .notes textarea.bbox{ width:100%; min-height:52px; box-sizing:border-box; border:${nBorder}; background:${nBg}; border-radius:${boxRad}; padding:6px 8px; color:${nText}; font-family:inherit; resize:vertical; }`);
+  /* 구역별 폰트 · 글자색 */
+  { const F=cfg.fonts||{}, ft=fontCss(F.top), fp=fontCss(F.pair), fc=fontCss(F.chars), fk=fontCss(F.skills), fw=fontCss(F.weap);
+    if(ft) L.push(`.charsheet .coc-sheet .info,.charsheet .coc-sheet .info input,.charsheet .coc-sheet .scard,.charsheet .coc-sheet .scard input{ font-family:${ft}; }`);
+    if(fp) L.push(`.charsheet .coc-sheet .winter{ font-family:${fp}; }`);
+    if(fc) L.push(`.charsheet .coc-sheet .chars,.charsheet .coc-sheet .chars input{ font-family:${fc}; }`);
+    if(fk) L.push(`.charsheet .coc-sheet .skills,.charsheet .coc-sheet .skills input{ font-family:${fk}; }`);
+    if(fw) L.push(`.charsheet .coc-sheet table.weap,.charsheet .coc-sheet table.weap input{ font-family:${fw}; }`);
+    const C=cfg.fontColors||{};
+    if(C.top)   L.push(`.charsheet .coc-sheet .info,.charsheet .coc-sheet .info input,.charsheet .coc-sheet .scard,.charsheet .coc-sheet .scard .cm .cur{ color:${C.top}; }`);
+    if(C.pair)  L.push(`.charsheet .coc-sheet .winter{ color:${C.pair}; }`);
+    if(C.chars) L.push(`.charsheet .coc-sheet .chars .c .nm{ color:${C.chars}; }`);
+    if(C.skills)L.push(`.charsheet .coc-sheet .skill .nm{ color:${C.skills}; }`);
+    if(C.weap)  L.push(`.charsheet .coc-sheet table.weap td{ color:${C.weap}; }`);
+  }
   L.push(rollTemplateCss());
   return L.join('\n');
 }
@@ -1709,9 +1832,29 @@ function download(name,text,mime){
   const a=document.createElement('a'); a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
 }
 
+/* ===== 제작탭 섹션 접기/펼치기 (아코디언) ===== */
+function buildAccordions(){
+  document.querySelectorAll('.panel').forEach(panel=>{
+    if(panel.dataset.acc) return;
+    [...panel.children].forEach(head=>{
+      if(!head.classList || !head.classList.contains('glabel')) return;
+      const body=document.createElement('div'); body.className='acc-body';
+      const move=[];
+      let cur=head.nextElementSibling;
+      while(cur && !(cur.classList && cur.classList.contains('glabel'))){ move.push(cur); cur=cur.nextElementSibling; }
+      head.after(body);
+      move.forEach(el=>body.appendChild(el));
+      head.classList.add('acc-head');
+      head.addEventListener('click',()=>{ head.classList.toggle('collapsed'); body.classList.toggle('collapsed'); });
+    });
+    panel.dataset.acc='1';
+  });
+}
+
 buildSheet();
 renderRollCards();
 applyRollDesign();
+buildAccordions();
 </script>
 </body>
 </html>
