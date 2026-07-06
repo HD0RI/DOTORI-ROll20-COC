@@ -47,17 +47,18 @@
   .rollcol{ flex:0 0 280px; --rc-card:#1a1d22; --rc-titlebg:#2a2f37; --rc-titlefg:#e9eaed;
     --rc-border:#3a3f47; --rc-body:#cfd3da; --t-crit:#d9b03a; --t-extreme:#7bd88f;
     --t-hard:#8fb8ef; --t-success:#cfd3da; --t-fail:#b06a6a; --t-fumble:#c0392b; }
+  #rollPreview{ position:sticky; top:0; align-self:flex-start; }
   .rollcol-cap{ font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim);
     text-align:center; margin-bottom:12px; }
   .rollcol-note{ font-size:11px; color:var(--dim); line-height:1.5; margin-top:10px; }
   .rollcard{ max-width:280px; margin:0 auto 12px; border:1px solid var(--rc-border);
-    border-radius:10px; overflow:hidden; box-shadow:0 8px 20px -12px #000; }
+    border-radius:10px; overflow:hidden; box-shadow:0 8px 20px -12px #000;
+    background-color:var(--rc-card); background-repeat:no-repeat; background-position:center; background-size:100% 100%; }
   .rc-title{ background:var(--rc-titlebg); color:var(--rc-titlefg); font-weight:700;
     text-align:center; padding:7px 10px; font-size:13px; }
   .rc-tbl{ width:100%; border-collapse:collapse; color:var(--rc-body);
-    background-color:var(--rc-card); background-image:var(--rc-cardimg,none);
-    background-repeat:no-repeat; background-position:bottom center; background-size:100%; }
-  .rc-tbl td{ padding:5px 11px; font-size:12px; border-top:1px solid var(--rc-border); }
+    background:transparent; }
+  .rc-tbl td{ padding:5px 11px; font-size:12px; border-top:var(--rc-borderw,1px) solid var(--rc-border); }
   .rc-l{ opacity:.6; width:40%; }
   .rc-v{ text-align:right; font-weight:600; }
   .tier-crit{ color:var(--t-crit); font-weight:800; }
@@ -86,19 +87,27 @@
 
   /* 상단 배너/로고 이미지 */
   .topbanner{ text-align:center; margin-bottom:16px; }
-  .topbanner img{ max-width:100%; max-height:130px; display:inline-block; }
+  .topbanner img{ max-width:100%; display:inline-block; }
   .topbanner.empty{ border:1px dashed var(--s-line); border-radius:4px; padding:18px;
     font-size:12px; opacity:.4; }
 
-  .top{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; }
-  .cards{ flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .top{ display:flex; gap:16px; align-items:stretch; justify-content:space-between; }
+  .cards{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:8px; }
   .scard{ background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius);
-    padding:10px 8px; text-align:center; min-width:0; }
-  .scard .lab{ font-size:12px; opacity:.8; }
-  .scard .big{ font-size:30px; font-weight:700; line-height:1.1; margin:2px 0; }
-  .scard .sub{ font-size:11px; opacity:.55; }
-  .scard .tag{ display:inline-block; margin-top:6px; font-size:10px; padding:2px 7px;
+    padding:10px 8px; text-align:center; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .scard .lab{ display:inline-block; background:var(--s-chip); color:var(--s-chiptext); border-radius:11px; padding:2px 12px; font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:4px; }
+  .scard .cm{ display:flex; align-items:baseline; justify-content:center; gap:6px; margin:5px 0 3px; }
+  .scard .cm .cur{ font-size:26px; font-weight:700; line-height:1; outline:none; color:var(--s-value); }
+  .scard .cm .div{ font-size:18px; opacity:.3; }
+  .scard .cm .mx{ font-size:16px; opacity:.6; }
+  .scard .tag{ display:inline-block; margin-top:4px; font-size:10px; padding:2px 7px;
     border-radius:10px; background:var(--s-chip); color:var(--s-chiptext); white-space:nowrap; }
+  .madrow{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:16px 0 2px; font-size:12px; }
+  .madrow .madlab{ font-weight:700; color:var(--s-header); letter-spacing:1px; }
+  .madbtn{ background:var(--s-chip); color:var(--s-chiptext); border-radius:10px; padding:2px 9px; font-size:11px; white-space:nowrap; }
+  .scard .cardroll{ display:flex; gap:4px; justify-content:center; align-items:center; min-height:15px; margin-top:5px; color:var(--s-accent); font-size:13px; line-height:1; cursor:pointer; }
+  .madrow .madstart{ opacity:.8; }
+  .madrow .madstart .ss{ font-weight:700; color:var(--s-value); outline:none; padding:0 4px; }
   .info{ flex:0 0 var(--s-infow,44%); background:var(--s-boxbg); border:var(--s-boxborder); border-radius:var(--s-boxradius); padding:12px 16px; }
   .info .row{ display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 10px; align-items:center; }
   .info .k{ font-size:11px; opacity:.6; color:var(--s-label); }
@@ -110,25 +119,28 @@
   .winter::before,.winter::after{ content:""; position:absolute; top:50%; width:26%; height:1px; background:var(--s-line); }
   .winter::before{ left:8%; } .winter::after{ right:8%; }
 
-  .chars{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; margin:14px 0; text-align:center; }
+  .chars{ display:grid; grid-template-columns:repeat(8,1fr); gap:6px; margin:14px 0; text-align:center; }
   .chars .c .nm{ font-size:12px; opacity:.85; color:var(--s-label); }
-  .chars .c .vv{ font-size:22px; font-weight:700; margin:2px 0; outline:none; color:var(--s-value); }
+  .chars .c .vv{ display:inline-block; box-sizing:border-box; width:44px; background:var(--s-chip); color:var(--s-chiptext); border-radius:12px; padding:2px 0; font-size:18px; font-weight:700; margin:3px 0; outline:none; text-align:center; }
   .chars .c .hf{ font-size:11px; opacity:.7; margin-bottom:2px; color:var(--s-hfcol); }
   .chars .c .ic{ height:18px; display:flex; gap:4px; justify-content:center; align-items:center; }
 
   .skills{ column-count:var(--s-skillcols,3); column-gap:26px; }
+  .skills .skill:nth-child(even){ background:var(--s-zebra,transparent); border-radius:3px; }
   .skill{ display:flex; align-items:center; gap:7px; break-inside:avoid; padding:2px 0; font-size:12px; }
   .skill .nm{ flex:1; opacity:.9; color:var(--s-label); }
-  .skill .val{ min-width:30px; height:18px; padding:0 6px; border-radius:9px; background:var(--s-chip);
-    color:var(--s-chiptext); text-align:center; font-size:11px; line-height:18px; outline:none; }
+  .skill .val{ box-sizing:border-box; width:34px; height:18px; padding:1px 0; border-radius:9px; background:var(--s-chip);
+    color:var(--s-chiptext); text-align:center; font-size:11px; line-height:16px; outline:none; flex:0 0 auto; }
   .skill .hf2{ font-size:10px; opacity:.62; min-width:30px; text-align:right; color:var(--s-hfcol); }
   .skill .ic{ display:inline-flex; gap:3px; align-items:center; color:var(--s-accent); font-size:12px; }
+  .ricon.r1{ color:var(--s-ic1,var(--s-accent)); }
+  .ricon.r2{ color:var(--s-ic2,var(--s-accent)); }
   .skill .ic img{ width:14px; height:14px; object-fit:contain; }
   .skill .ic .ricon{ width:14px; text-align:center; }
-  .customskills{ column-count:3; column-gap:26px; margin-top:4px; }
+  .skill .skchk{ flex:0 0 13px; width:13px; height:13px; margin:0; accent-color:var(--s-accent); cursor:pointer; }
   .skill.custom .nm{ outline:none; border-bottom:1px dotted var(--s-line); }
-  .skill.custom .delskill{ background:none; border:none; color:var(--s-accent); opacity:.5;
-    cursor:pointer; font-size:12px; padding:0 2px; }
+  .skill.custom .delskill{ flex:0 0 14px; width:14px; background:none; border:none; color:var(--s-accent); opacity:.5;
+    cursor:pointer; font-size:12px; padding:0; text-align:center; }
   .skill.custom .delskill:hover{ opacity:1; }
   .addskill{ margin-top:10px; background:transparent; border:1px dashed var(--s-line);
     color:var(--s-accent); border-radius:4px; padding:7px 12px; font-size:12px; cursor:pointer;
@@ -146,10 +158,27 @@
   .wtitle{ margin:var(--s-secgap,22px) 0 8px; font-size:12px; color:var(--s-header); letter-spacing:2px; font-weight:700;
     border-bottom:var(--s-underline,1px) solid var(--s-line); padding-bottom:4px; }
   table.weap{ width:100%; border-collapse:collapse; font-size:11px; }
-  table.weap th,table.weap td{ border:var(--s-weapb,1px) solid var(--s-line); padding:4px 6px; text-align:center; opacity:.9; }
+  table.weap th,table.weap td{ border:var(--s-weapb,1px) solid var(--s-wline,var(--s-line)); padding:4px 6px; text-align:center; opacity:.9; }
+  table.weap td{ color:var(--s-wtext,inherit); }
+  table.weap th{ background:var(--s-whbg,transparent); color:var(--s-whfg,var(--s-header)); }
   table.weap .wroll{ width:30px; color:var(--s-accent); }
   table.weap .wdmg .dbl{ font-size:10px; opacity:.55; }
-  .notes .nbox{ border:var(--s-boxborder); background:var(--s-boxbg); min-height:60px; border-radius:var(--s-boxradius); }
+  table.weap .wdmg .dbtog{ font-size:10px; opacity:.7; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:2px; }
+  table.weap .wdmg .dbtog input{ width:11px; height:11px; margin:0; }
+  .notes{ position:relative; }
+  .notes .nt-r{ position:absolute; opacity:0; width:0; height:0; pointer-events:none; }
+  .notes .nt-tabbar{ display:flex; gap:6px; margin-bottom:8px; border-bottom:var(--s-underline,1px) solid var(--s-line); }
+  .notes .nt-tab{ cursor:pointer; padding:4px 13px; font-weight:700; color:var(--s-header); letter-spacing:1px; border-radius:6px 6px 0 0; opacity:.5; }
+  .notes #nt-misc:checked ~ .nt-tabbar .nt-tab-misc,
+  .notes #nt-story:checked ~ .nt-tabbar .nt-tab-story{ opacity:1; background:var(--s-boxbg); }
+  .notes .nt-panel{ display:none; }
+  .notes #nt-misc:checked ~ .nt-panel-misc,
+  .notes #nt-story:checked ~ .nt-panel-story{ display:block; }
+  .notes .nbox{ border:var(--s-nborder,var(--s-boxborder)); background:var(--s-nbg,var(--s-boxbg)); color:var(--s-ntext,inherit); min-height:60px; border-radius:var(--s-boxradius); }
+  .notes .backgrid{ display:grid; grid-template-columns:1fr 1fr; gap:9px 12px; }
+  .notes .bfield.wide{ grid-column:1 / -1; }
+  .notes .bfield label{ display:block; font-size:11px; font-weight:700; color:var(--s-header); letter-spacing:.5px; margin-bottom:3px; }
+  .notes .bbox{ border:var(--s-nborder,var(--s-boxborder)); background:var(--s-nbg,var(--s-boxbg)); color:var(--s-ntext,inherit); min-height:42px; border-radius:var(--s-boxradius); }
 
   /* ── 오른쪽: 제작탭 ── */
   aside{ flex:0 0 360px; width:360px; background:var(--panel); border-left:1px solid var(--line);
@@ -163,16 +192,16 @@
   .panel.on{ display:block; }
   .panel h3{ font-size:13px; margin:0 0 3px; font-weight:600; }
   .panel .desc{ font-size:11.5px; color:var(--dim); margin:0 0 14px; line-height:1.55; }
-  .glabel{ font-size:10.5px; letter-spacing:1px; text-transform:uppercase; color:var(--dim);
-    margin:18px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--line); }
-  .field{ margin-bottom:12px; }
+  .glabel{ font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--ink); font-weight:700;
+    margin:22px 0 9px; padding:0 0 0 9px; border-left:3px solid var(--ink); line-height:1.3; }
+  .field{ background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:11px 12px; margin-bottom:9px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
   .field label{ display:block; font-size:11.5px; color:var(--ink-2); margin-bottom:4px; }
   .field input[type=text],.field input[type=url]{ width:100%; padding:8px 10px; font-size:12.5px;
     border:1px solid var(--line-2); border-radius:var(--r); background:#fff; color:var(--ink); }
   .field input:focus{ outline:none; border-color:var(--ink); }
   .field .hint{ font-size:10.5px; color:var(--dim); margin-top:3px; }
 
-  .colorrow{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .colorrow{ display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:8px 12px; margin-bottom:8px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
   .colorrow label{ flex:1; font-size:12px; }
   .colorrow input[type=color]{ width:42px; height:30px; border:1px solid var(--line-2);
     border-radius:var(--r); background:#fff; cursor:pointer; padding:2px; }
@@ -180,6 +209,10 @@
     border:1px solid var(--line-2); border-radius:var(--r); }
 
   .ghbox{ background:var(--panel-2); border:1px solid var(--line); border-radius:var(--r); padding:11px; margin-bottom:6px; }
+  .ghrow{ display:flex; gap:6px; align-items:center; margin-top:6px; }
+  .ghrow .ghfn{ flex:1; font-size:11.5px; padding:6px 8px; border:1px solid var(--line-2); border-radius:6px; }
+  .ghrow .ghbtn{ flex:0 0 auto; font-size:11px; padding:6px 10px; border:1px solid var(--line-2); border-radius:6px; background:var(--panel-3); cursor:pointer; white-space:nowrap; }
+  .ghrow .ghbtn:hover{ background:var(--line); }
   .gh2{ display:flex; gap:9px; margin-bottom:8px; }
   .gh2 > div{ flex:1; }
   .gh2 label{ font-size:10.5px; color:var(--ink-2); display:block; margin-bottom:3px; }
@@ -200,7 +233,8 @@
   .preset button{ flex:1; padding:9px; font-size:12px; border:1px solid var(--line-2);
     background:#fff; border-radius:var(--r); cursor:pointer; }
   .preset button:hover{ background:var(--panel-2); }
-  .boxrow{ display:flex; align-items:center; gap:8px; margin-bottom:10px; font-size:12.5px; color:var(--ink-2); }
+  .boxrow{ display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12.5px; color:var(--ink-2); background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:9px 12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
+  .ckrow{ background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; box-shadow:0 1px 2px rgba(0,0,0,.03); }
   .boxrow input[type=range]{ flex:1; }
   .boxrow input[type=number]{ padding:5px 7px; border:1px solid var(--line-2); border-radius:var(--r); font-size:12px; }
   .boxrow input[type=checkbox]{ width:15px; height:15px; vertical-align:middle; }
@@ -245,9 +279,9 @@
     <div class="stagerow">
       <div class="sheet" id="sheet"><div class="pad" id="sheetPad"></div></div>
       <div class="rollcol" id="rollPreview">
-        <div class="rollcol-cap">굴림 결과 카드</div>
+        <div class="rollcol-cap">롤 템플릿 (굴림 결과)</div>
         <div id="rollCards"></div>
-        <div class="rollcol-note">Roll20 채팅에 뜨는 굴림 결과 모양입니다. 오른쪽 ‘결과값’ 탭에서 색을 바꾸세요.</div>
+        <div class="rollcol-note">Roll20 채팅에 뜨는 굴림 결과 모양입니다. ‘롤 템플릿’ 탭에서 색을 바꾸세요.</div>
       </div>
     </div>
   </section>
@@ -257,16 +291,16 @@
       <button class="on" data-tab="img">이미지</button>
       <button data-tab="color">색상</button>
       <button data-tab="layout">레이아웃</button>
-      <button data-tab="roll">결과값</button>
+      <button data-tab="roll">롤 템플릿</button>
       <button data-tab="export">내보내기</button>
     </div>
 
     <!-- 이미지 탭 -->
     <div class="panel on" id="p-img">
       <h3>배경 &amp; 다이스 이미지</h3>
-      <p class="desc">URL을 직접 넣거나, 아래 ‘파일’ 버튼으로 이미지를 골라 미리보기에 바로 띄울 수 있습니다. 저장소 정보를 채우면 고른 파일의 깃허브 링크가 URL 칸에 자동으로 입력됩니다.</p>
+      <p class="desc">이미지 <b>URL(링크)</b>을 직접 붙여넣거나, 아래 GitHub 저장소 정보를 채우고 각 칸의 <b>파일명 → 링크</b> 버튼으로 raw 링크를 자동 입력하세요.</p>
 
-      <div class="glabel">깃허브 저장소 (자동 링크용)</div>
+      <div class="glabel">GitHub 저장소 (선택 · 자동 링크용)</div>
       <div class="ghbox">
         <div class="gh2">
           <div><label>사용자명</label><input type="text" id="gh-user" placeholder="username"></div>
@@ -276,36 +310,31 @@
           <div><label>브랜치</label><input type="text" id="gh-branch" placeholder="main"></div>
           <div><label>폴더</label><input type="text" id="gh-folder" placeholder="images"></div>
         </div>
-        <div class="hint">파일을 고르면 <code>raw.githubusercontent.com/사용자명/저장소/브랜치/폴더/파일명</code> 링크가 자동 생성됩니다. 그 파일을 저장소의 해당 폴더에 커밋하면 Roll20에서 작동합니다.</div>
+        <div class="hint"><b>공개(public) 저장소</b>에 이미지를 커밋한 뒤, 아래 각 이미지 칸의 <b>파일명 → GitHub 링크</b>로 raw 링크를 자동으로 넣을 수 있습니다. (raw 링크는 핫링크 차단·만료가 없어 Roll20에서 안정적으로 작동)</div>
       </div>
 
       <div class="glabel">상단 이미지 (로고/배너)</div>
       <div class="field">
         <label>시트 맨 위 이미지 URL</label>
         <input type="url" id="img-top" placeholder="https://i.imgur.com/logo.png">
-        <div class="hint">제목 위, 시트 가장 윗부분에 표시됩니다. 권장 <b>600 × 230px</b> (가로 최대 850)</div>
+        <div class="hint">제목 위, 시트 가장 윗부분에 표시됩니다. 권장 <b>600 × 400px</b> (가로 최대 850). 아래 ‘고정 크기’에서 높이를 자유롭게 조절하세요.</div>
       </div>
 
       <div class="glabel">시트 배경 (위치별 겹쳐 깔기)</div>
       <div class="field">
         <label>전체 배경 (바닥) URL</label>
         <input type="url" id="img-bg" placeholder="https://i.imgur.com/xxxx.png">
-        <div class="hint">시트 전체에 cover로 깔립니다. 권장 <b>850 × 1400px</b></div>
+        <div class="hint">시트 전체를 자동으로 덮습니다(cover). 클수록 선명합니다 — 권장 <b>1400 × 2000px 이상</b></div>
       </div>
       <div class="field">
         <label>상단 배경 URL</label>
         <input type="url" id="img-topbg" placeholder="톱니·사슬 등 윗부분 장식">
-        <div class="hint">시트 맨 위에 고정. 권장 <b>850 × 400px</b> (가로 850 고정)</div>
-      </div>
-      <div class="field">
-        <label>가운데 배경 URL</label>
-        <input type="url" id="img-midbg" placeholder="가운데 띠·찢긴 종이 등">
-        <div class="hint">세로 중앙에 배치. 권장 <b>850 × 300px</b></div>
+        <div class="hint">시트 맨 위에 고정. 권장 <b>1400 × 700px</b> (고화질 권장, 표시 폭은 아래 고정 크기로 조절)</div>
       </div>
       <div class="field">
         <label>하단 배경 URL</label>
         <input type="url" id="img-botbg" placeholder="건물 실루엣 등 아랫부분">
-        <div class="hint">시트 맨 아래에 고정. 권장 <b>850 × 400px</b></div>
+        <div class="hint">시트 맨 아래에 고정. 권장 <b>1400 × 700px</b> (고화질 권장, 표시 폭은 아래 고정 크기로 조절)</div>
       </div>
 
       <div class="glabel">굴림 아이콘 (능력치·기능당 2개)</div>
@@ -313,11 +342,13 @@
         <label>아이콘 1 — 일반 굴림 (1d100)</label>
         <input type="url" id="img-icon" placeholder="비우면 ◆ 기본 표시">
         <div class="hint">정사각형 이미지 권장 · 시트 표시 크기는 아래에서 고정 (기본 14×14px)</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px;font-size:11.5px"><span>◆ 색</span><input type="color" id="ic1-color" style="width:38px;height:26px;padding:2px;border:1px solid var(--line-2);border-radius:6px"><input class="hex" id="ic1-color-h" style="width:84px"></div>
       </div>
       <div class="field">
         <label>아이콘 2 — 보너스/페널티 굴림</label>
         <input type="url" id="img-icon2" placeholder="비우면 ◆ 기본 표시">
         <div class="hint">정사각형 이미지 권장 · 각 능력치·기능 옆에 굴림 버튼이 두 개씩 들어갑니다.</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:7px;font-size:11.5px"><span>◆ 색</span><input type="color" id="ic2-color" style="width:38px;height:26px;padding:2px;border:1px solid var(--line-2);border-radius:6px"><input class="hex" id="ic2-color-h" style="width:84px"></div>
       </div>
     </div>
 
@@ -337,14 +368,35 @@
         <button data-preset="mono">순수 흑백</button>
       </div>
 
+      <div class="glabel">배경 그라데이션</div>
+      <label class="ckrow" style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><input type="checkbox" id="grad-on"> 배경에 그라데이션 사용</label>
+      <div class="colorrow"><label>그라데이션 색 1</label><input type="color" id="grad-c1"><input class="hex" id="grad-c1-h"></div>
+      <div class="colorrow"><label>그라데이션 색 2</label><input type="color" id="grad-c2"><input class="hex" id="grad-c2-h"></div>
+      <div class="boxrow">
+        <span>방향(각도)</span>
+        <input type="range" id="grad-ang" min="0" max="360" value="135">
+        <input type="number" id="grad-ang-n" min="0" max="360" value="135" style="width:54px"> °
+      </div>
+
       <div class="glabel">사각 박스 (스탯·정보 칸)</div>
       <div class="boxrow">
         <label><input type="checkbox" id="box-on" checked> 박스 배경 표시</label>
       </div>
       <div class="boxrow">
+        <label><input type="checkbox" id="box-border-on" checked> 박스 테두리 표시</label>
+      </div>
+      <div class="colorrow"><label>사각박스 색 (채움)</label><input type="color" id="box-fill"><input class="hex" id="box-fill-h"></div>
+      <div class="colorrow"><label>사각박스 테두리 색</label><input type="color" id="box-color"><input class="hex" id="box-color-h"></div>
+      <div class="preset"><button id="box-color-reset">박스 색·테두리 자동(글자색 기준)</button></div>
+      <div class="boxrow">
         <span>모서리 둥글기</span>
         <input type="range" id="box-radius" min="0" max="30" value="4">
         <input type="number" id="box-radius-n" min="0" max="60" value="4" style="width:54px"> px
+      </div>
+      <div class="boxrow">
+        <span>박스 채움 투명도</span>
+        <input type="range" id="box-op" min="0" max="100" value="100">
+        <input type="number" id="box-op-n" min="0" max="100" value="100" style="width:54px"> %
       </div>
 
       <div class="glabel">무기 / 전투 표</div>
@@ -353,14 +405,30 @@
         <input type="range" id="weapb" min="0" max="10" value="1">
         <input type="number" id="weapb-n" min="0" max="10" value="1" style="width:54px"> px
       </div>
+      <div class="colorrow"><label>머리글 배경</label><input type="color" id="w-hbg"><input class="hex" id="w-hbg-h"></div>
+      <div class="colorrow"><label>머리글 글자</label><input type="color" id="w-hfg"><input class="hex" id="w-hfg-h"></div>
+      <div class="colorrow"><label>표 테두리</label><input type="color" id="w-line"><input class="hex" id="w-line-h"></div>
+      <div class="colorrow"><label>표 글자</label><input type="color" id="w-text"><input class="hex" id="w-text-h"></div>
+      <div class="preset"><button id="w-reset">무기 표 색 자동으로 초기화</button></div>
+
+      <div class="glabel">기타 / 배경이야기 칸</div>
+      <div class="colorrow"><label>칸 배경</label><input type="color" id="n-bg"><input class="hex" id="n-bg-h"></div>
+      <div class="colorrow"><label>칸 글자</label><input type="color" id="n-text"><input class="hex" id="n-text-h"></div>
+      <div class="colorrow"><label>칸 테두리</label><input type="color" id="n-border"><input class="hex" id="n-border-h"></div>
+      <div class="preset"><button id="n-reset">기타 칸 색 자동으로 초기화</button></div>
 
       <div class="glabel">색상 세분화 (바꾸면 그 색으로 고정)</div>
       <div class="colorrow"><label>섹션 헤더</label><input type="color" id="cg-header"><input class="hex" id="cg-header-h"></div>
       <div class="colorrow"><label>라벨(이름·기능명)</label><input type="color" id="cg-label"><input class="hex" id="cg-label-h"></div>
       <div class="colorrow"><label>값 · 숫자</label><input type="color" id="cg-value"><input class="hex" id="cg-value-h"></div>
-      <div class="colorrow"><label>기능 값 칩</label><input type="color" id="cg-chip"><input class="hex" id="cg-chip-h"></div>
+      <div class="colorrow"><label>알약(칩) 색</label><input type="color" id="cg-chip"><input class="hex" id="cg-chip-h"></div>
+      <div class="colorrow"><label>알약 글자색</label><input type="color" id="cg-chiptext"><input class="hex" id="cg-chiptext-h"></div>
       <div class="colorrow"><label>절반 · 1/5</label><input type="color" id="cg-hf"><input class="hex" id="cg-hf-h"></div>
       <div class="preset"><button id="cg-reset">세분화 색 자동으로 초기화</button></div>
+
+      <div class="glabel">기능 줄무늬 (가독성)</div>
+      <label class="ckrow" style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><input type="checkbox" id="zebra-on"> 기능 목록에 줄무늬 표시</label>
+      <div class="colorrow"><label>줄무늬 색</label><input type="color" id="zebra-color"><input class="hex" id="zebra-color-h"></div>
     </div>
 
     <!-- 레이아웃 탭 -->
@@ -368,6 +436,7 @@
       <h3>제목 &amp; 기본값</h3>
       <p class="desc">시트 상단 문구와 능력치 기본값입니다. 미리보기에서 숫자를 직접 클릭해 바꿔도 됩니다.</p>
       <div class="field"><label>디바이더 문구</label><input type="text" id="t-winter"></div>
+      <label class="ckrow" style="display:flex;align-items:center;gap:7px;margin:0 0 8px"><input type="checkbox" id="t-winter-on" checked> 디바이더(PAIR NAME) 표시</label>
 
       <h3 style="margin-top:18px">배경 가독성</h3>
       <p class="desc">배경 이미지 위에 색을 덮어 글자가 묻히지 않게 합니다. 어둡게 하려면 검정, 밝게 하려면 흰색.</p>
@@ -407,8 +476,8 @@
 
     <!-- 결과값 탭 -->
     <div class="panel" id="p-roll">
-      <h3>굴림 결과 카드</h3>
-      <p class="desc">Roll20 채팅에 뜨는 굴림 결과(rolltemplate)의 색을 정합니다. 왼쪽 미리보기에 바로 반영됩니다.</p>
+      <h3>롤 템플릿</h3>
+      <p class="desc">Roll20 채팅에 뜨는 굴림 결과(rolltemplate)의 색을 정합니다. 아래 미리보기에 바로 반영됩니다.</p>
       <div class="glabel">카드</div>
       <div class="colorrow"><label>카드 배경</label><input type="color" id="rc-cardBg"><input class="hex" id="rh-cardBg"></div>
       <div class="colorrow"><label>제목 막대</label><input type="color" id="rc-titleBg"><input class="hex" id="rh-titleBg"></div>
@@ -422,6 +491,16 @@
       <div class="colorrow"><label>성공</label><input type="color" id="rc-success"><input class="hex" id="rh-success"></div>
       <div class="colorrow"><label>실패</label><input type="color" id="rc-fail"><input class="hex" id="rh-fail"></div>
       <div class="colorrow"><label>대실패</label><input type="color" id="rc-fumble"><input class="hex" id="rh-fumble"></div>
+
+      <div class="glabel">카드 이미지 · 표 테두리</div>
+      <div class="field">
+        <label>롤 템플릿 이미지 URL</label>
+        <input type="url" id="img-rollbg" placeholder="카드 배경 이미지 (세로형)">
+        <div class="hint">카드 전체를 채웁니다. 권장 <b>700 × 1000px</b>. 테두리를 원하면 이미지 자체에 넣어주세요.</div>
+      </div>
+      <div class="boxrow"><span>구분선 두께</span>
+        <input type="range" id="roll-bw" min="0" max="6" value="1">
+        <input type="number" id="roll-bw-n" min="0" max="6" value="1" style="width:54px"> px</div>
     </div>
 
     <!-- 내보내기 탭 -->
@@ -440,7 +519,17 @@
 /* ===== 데이터 ===== */
 const CHARS = [
   ['str','근력',80],['dex','민첩',50],['pow','정신력',50],['con','건강',50],
-  ['app','외모',50],['edu','교육',50],['siz','크기',50],['int','지능',50],['luck','행운',50]
+  ['app','외모',50],['edu','교육',50],['siz','크기',50],['int','지능',50]
+];
+const BACKFIELDS = [
+  ['back_desc','개인 묘사',true],
+  ['back_ideology','사상 / 신념'],
+  ['back_people','중요한 사람'],
+  ['back_locations','의미 있는 장소'],
+  ['back_possessions','소중한 물건'],
+  ['back_traits','특성'],
+  ['back_injuries','상처 / 흉터'],
+  ['back_phobias','공포증 / 광기']
 ];
 const SKILLS = [
   ['appraise','감정',5],['archaeology','고고학',1],['spothidden','관찰력',25],
@@ -462,26 +551,31 @@ const INFO = [['name','이름'],['occupation','직업'],['move','이동력'],['d
 
 /* ===== 상태 ===== */
 const cfg = {
-  title:'미명(未名)의 조사관', winter:'PAIR NAME',
+  title:'미명(未名)의 조사관', winter:'PAIR NAME', dividerOn:true,
+  zebra:{ on:false, color:'' },
   fg:'#233b4d', bg:'#f4eeb0', accent:'#2e6e91',
-  box:{ on:true, radius:4 },
+  box:{ on:true, radius:4, color:'', fill:'', borderOn:true, fillOpacity:100 },
   weapBorder:1,
+  weap:{ headBg:'', headFg:'', border:'', text:'' },
+  notes:{ bg:'', fg:'', border:'' },
   overlay:{ color:'#000000', opacity:0 },
+  grad:{ on:false, c1:'#f4eeb0', c2:'#e0d27a', angle:135 },
+  iconColor:'', iconColor2:'',
   layout:{ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 },
   shape:{ borderW:1, radius:8, borderColor:'', underline:1 },
-  col:{ header:'', label:'', value:'', chip:'', hf:'' },
-  topImg:'', bgImg:'', topBgImg:'', midBgImg:'', botBgImg:'', iconImg:'', iconImg2:'', values:{}, customSkills:[], customWeapons:[],
+  col:{ header:'', label:'', value:'', chip:'', chipText:'', hf:'' },
   gh:{ user:'', repo:'', branch:'main', folder:'images' },
   uploads:{},
-  size:{ top:{w:600,h:230}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300},
-         botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14} },
-  roll:{ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d',
+  topImg:'', bgImg:'', topBgImg:'', midBgImg:'', botBgImg:'', iconImg:'', iconImg2:'', rollImg:'', values:{}, customSkills:[], customWeapons:[],
+  size:{ top:{w:600,h:400}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300},
+         botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14}, rollBg:{w:700,h:1000} },
+  roll:{ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d', borderW:1,
          crit:'#6a3fb0', extreme:'#1f7a44', hard:'#2e6e91', success:'#2a4d63', fail:'#b0602a', fumble:'#9e2a2a' }
 };
 CHARS.forEach(([id,,v])=> cfg.values[id]=v);
 SKILLS.forEach(([id,,v])=> cfg.values[id]=v);
 cfg.values.hp_cur=10; cfg.values.hp_max=10; cfg.values.mp_cur=10; cfg.values.mp_max=10;
-cfg.values.san_cur=40; cfg.values.san_max=99;
+cfg.values.san_cur=40; cfg.values.san_max=99; cfg.values.san_start=99; cfg.values.luck=50; cfg.values.luck_max=99;
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -500,26 +594,32 @@ function buildSheet(){
   });
   h+='</div></div><div class="cards">';
   h+=scard('체력','hp','건강'); h+=scard('마력','mp','평정심'); h+=scard('이성','san','광기의 발작');
+  h+=`<div class="scard luckcard"><div class="lab">운</div>`+
+     `<div class="cm"><span class="cur" data-num="luck" contenteditable="true">${cfg.values.luck}</span>`+
+     `<span class="div">|</span>`+
+     `<span class="mx" data-num="luck_max" contenteditable="true">${cfg.values.luck_max}</span></div>`+
+     `<span class="cardroll" title="운 굴림">${oneIcon(imgSrc('icon',cfg.iconImg),cfg.size.icon,'r1')}${oneIcon(imgSrc('icon2',cfg.iconImg2),cfg.size.icon2,'r2')}</span></div>`;
   h+='</div></div>';
-  h+=`<div class="winter" id="winterTxt" contenteditable="true">${esc(cfg.winter)}</div>`;
+  h+='<div class="madrow"><span class="madlab">광기의 발작</span>'+
+     '<span class="madbtn">◆ 실시간</span><span class="madbtn">◆ 요약</span>'+
+     '<span class="madstart">시작 이성 <span class="ss" data-num="san_start" contenteditable="true">'+(cfg.values.san_start??'')+'</span></span></div>';
+  if(cfg.dividerOn!==false) h+=`<div class="winter" id="winterTxt" contenteditable="true">${esc(cfg.winter)}</div>`;
   h+='<div class="wtitle">능력치</div>';
   h+='<div class="chars">';
   CHARS.forEach(([id,nm])=>{
     h+=`<div class="c"><div class="nm">${nm}</div>`+
        `<div class="vv" data-num="${id}" contenteditable="true">${cfg.values[id]}</div>`+
-       `<div class="hf"><span data-half="${id}"></span> · <span data-fifth="${id}"></span></div>`+
        `<div class="ic" data-icons>${iconsHtml()}</div></div>`;
   });
   h+='</div>';
   h+='<div class="wtitle">기능</div>';
   h+='<div class="skills">';
   SKILLS.forEach(([id,nm])=>{
-    h+=`<div class="skill"><span class="ic" data-icons>${iconsHtml()}</span><span class="nm">${nm}</span>`+
+    h+=`<div class="skill"><input type="checkbox" class="skchk" title="성공 체크">`+
+       `<span class="nm">${nm}</span>`+
        `<span class="val" data-num="${id}" contenteditable="true">${cfg.values[id]}</span>`+
-       `<span class="hf2"><span data-half="${id}"></span>/<span data-fifth="${id}"></span></span></div>`;
+       `<span class="ic" data-icons>${iconsHtml()}</span></div>`;
   });
-  h+='</div>';
-  h+='<div class="customskills">';
   cfg.customSkills.forEach((s,i)=> h+=customSkillRow(s,i));
   h+='</div>';
   h+='<button class="addskill" id="addSkill">+ 기능 추가</button>';
@@ -530,7 +630,16 @@ function buildSheet(){
   cfg.customWeapons.forEach((w,i)=> h+=customWeaponRow(w,i));
   h+='</table>';
   h+='<button class="addweap" id="addWeapon">+ 무기 추가</button>';
-  h+='<div class="notes"><div class="wtitle">기타</div><div class="nbox"></div></div>';
+  h+='<div class="notes">'+
+     '<input type="radio" id="nt-misc" name="nt" class="nt-r" checked>'+
+     '<input type="radio" id="nt-story" name="nt" class="nt-r">'+
+     '<div class="nt-tabbar"><label for="nt-misc" class="nt-tab nt-tab-misc">기타</label>'+
+     '<label for="nt-story" class="nt-tab nt-tab-story">배경이야기</label></div>'+
+     '<div class="nt-panel nt-panel-misc"><div class="nbox"></div></div>'+
+     '<div class="nt-panel nt-panel-story"><div class="backgrid">'+
+       BACKFIELDS.map(([id,lab,wide])=>`<div class="bfield${wide?' wide':''}"><label>${lab}</label><div class="bbox"></div></div>`).join('')+
+     '</div></div>'+
+     '</div>';
   pad.innerHTML=h;
   bindEditable(); applyTheme(); applyLayout(); applyImages(); refreshComputed();
 }
@@ -538,26 +647,30 @@ function scard(lab,key,tag){
   const dm=(key==='hp'||key==='mp');
   const maxCell = dm ? `<span data-derived="${key}_max"></span>`
                      : `<span data-num="${key}_max" contenteditable="true">${cfg.values[key+'_max']}</span>`;
+  const roll = (key==='san') ? `<span class="cardroll" title="이성 판정">${oneIcon(imgSrc('icon',cfg.iconImg),cfg.size.icon,'r1')}${oneIcon(imgSrc('icon2',cfg.iconImg2),cfg.size.icon2,'r2')}</span>` : `<span class="cardroll"></span>`;
   return `<div class="scard"><div class="lab">${lab}</div>`+
-    `<div class="big" data-num="${key}_cur" contenteditable="true">${cfg.values[key+'_cur']}</div>`+
-    `<div class="sub"><span data-num="${key}_cur">${cfg.values[key+'_cur']}</span> / ${maxCell}</div>`+
-    `<div class="tag">${tag}</div></div>`;
+    `<div class="cm"><span class="cur" data-num="${key}_cur" contenteditable="true">${cfg.values[key+'_cur']}</span>`+
+    `<span class="div">|</span>`+
+    `<span class="mx">${maxCell}</span></div>`+roll+`</div>`;
 }
 function up(key){ return cfg.uploads && cfg.uploads[key] && cfg.uploads[key].dataUrl; }
-function imgSrc(key,urlVal){ return up(key) || urlVal || ''; }      // 미리보기: 업로드 우선
-function exportSrc(key,urlVal){ return urlVal || up(key) || ''; }    // 내보내기: URL 우선, 없으면 임베드
+function imgSrc(key,urlVal){ return up(key) || urlVal || ''; }      // 미리보기: 업로드(미리보기) 우선
+function exportSrc(key,urlVal){ return urlVal || up(key) || ''; }    // 내보내기: URL 우선
 function bgSpec(resolve){
   const Z=cfg.size;
   const layers=[
     [resolve('topBg',cfg.topBgImg),'top center',`${Z.topBg.w}px ${Z.topBg.h}px`],
-    [resolve('midBg',cfg.midBgImg),'center',`${Z.midBg.w}px ${Z.midBg.h}px`],
     [resolve('botBg',cfg.botBgImg),'bottom center',`${Z.botBg.w}px ${Z.botBg.h}px`],
-    [resolve('bg',cfg.bgImg),'center',`${Z.bg.w}px ${Z.bg.h}px`]
+    [resolve('bg',cfg.bgImg),'center','cover']
   ].filter(l=>l[0]);
   const ov=cfg.overlay;
   if(ov && ov.opacity>0){
     const c=rgbaOf(ov.color, ov.opacity);
     layers.unshift([`__GRAD__linear-gradient(${c},${c})`,'center','cover']);
+  }
+  if(cfg.grad && cfg.grad.on){
+    const g=`linear-gradient(${cfg.grad.angle??135}deg, ${cfg.grad.c1||cfg.bg}, ${cfg.grad.c2||cfg.bg})`;
+    layers.push([`__GRAD__${g}`,'center','cover']);
   }
   if(!layers.length) return { image:'none', position:'center', size:'cover', repeat:'no-repeat' };
   return {
@@ -575,25 +688,27 @@ function topBannerHtml(){
     ? `<div class="topbanner" id="topBanner"><img src="${esc(s)}" style="width:${z.w}px;height:${z.h}px;object-fit:contain" alt=""></div>`
     : `<div class="topbanner empty" id="topBanner">상단 이미지 (로고/배너) — 제작탭 ‘이미지’에서 URL을 넣거나 파일을 고르세요</div>`;
 }
-function oneIcon(url,z){
+function oneIcon(url,z,cls){
   const st=`width:${z.w}px;height:${z.h}px`;
-  return url ? `<img class="ricon" style="${st};object-fit:contain" src="${esc(url)}" alt="">`
-             : `<span class="ricon" style="${st};display:inline-flex;align-items:center;justify-content:center;line-height:1">◆</span>`;
+  const c=cls||'';
+  return url ? `<img class="ricon ${c}" style="${st};object-fit:contain" src="${esc(url)}" alt="">`
+             : `<span class="ricon ${c}" style="${st};display:inline-flex;align-items:center;justify-content:center;line-height:1">◆</span>`;
 }
-function iconsHtml(){ return oneIcon(imgSrc('icon',cfg.iconImg),cfg.size.icon)+oneIcon(imgSrc('icon2',cfg.iconImg2),cfg.size.icon2); }
+function iconsHtml(){ return oneIcon(imgSrc('icon',cfg.iconImg),cfg.size.icon,'r1')+oneIcon(imgSrc('icon2',cfg.iconImg2),cfg.size.icon2,'r2'); }
 function customSkillRow(s,i){
-  return `<div class="skill custom"><span class="ic" data-icons>${iconsHtml()}</span>`+
+  return `<div class="skill custom"><input type="checkbox" class="skchk" title="성공 체크">`+
     `<span class="nm" data-cname="${i}" contenteditable="true">${esc(s.name)}</span>`+
     `<span class="val" data-cval="${i}" contenteditable="true">${esc(s.value)}</span>`+
-    `<span class="hf2"><span data-chalf="${i}"></span>/<span data-cfifth="${i}"></span></span>`+
+    `<span class="ic" data-icons>${iconsHtml()}</span>`+
     `<button class="delskill" data-delskill="${i}" title="삭제">✕</button></div>`;
 }
 const WCOLS=['name','skill','dmg','range','atk','ammo','malf'];
 function customWeaponRow(w,i){
+  const showDb = w.db!==false;
   let td=`<td class="wroll">◆</td>`;
   td+=`<td contenteditable="true" data-w="name" data-wi="${i}">${esc(w.name||'')}</td>`;
   td+=`<td contenteditable="true" data-w="skill" data-wi="${i}">${esc(w.skill||'')}</td>`;
-  td+=`<td class="wdmg"><span contenteditable="true" data-w="dmg" data-wi="${i}">${esc(w.dmg||'')}</span> <span class="dbl">+ db</span></td>`;
+  td+=`<td class="wdmg"><span contenteditable="true" data-w="dmg" data-wi="${i}">${esc(w.dmg||'')}</span> <label class="dbtog" title="피해보너스(db) 적용"><input type="checkbox" data-wdb="${i}" ${showDb?'checked':''}>db</label></td>`;
   ['range','atk','ammo','malf'].forEach(c=> td+=`<td contenteditable="true" data-w="${c}" data-wi="${i}">${esc(w[c]||'')}</td>`);
   return `<tr>${td}<td><button class="delweap" data-delweap="${i}" title="삭제">✕</button></td></tr>`;
 }
@@ -610,11 +725,21 @@ function applyTheme(){
   s.style.setProperty('--s-card',rgbaOf(cfg.fg,.06));
   const chip = cfg.col.chip || cfg.accent;
   s.style.setProperty('--s-chip', chip);
-  s.style.setProperty('--s-chiptext', contrastOf(chip));
+  s.style.setProperty('--s-chiptext', cfg.col.chipText || contrastOf(chip));
   const on=cfg.box.on;
-  s.style.setProperty('--s-boxbg', on ? rgbaOf(cfg.fg,.06) : 'transparent');
-  s.style.setProperty('--s-boxborder', on ? `1px solid ${rgbaOf(cfg.fg,.22)}` : '1px solid transparent');
+  const boxEdge = cfg.box.color || rgbaOf(cfg.fg,.22);
+  const bop = (cfg.box.fillOpacity==null?100:cfg.box.fillOpacity)/100;
+  const boxFillCol = cfg.box.fill ? rgbaOf(cfg.box.fill, bop) : rgbaOf(cfg.fg, .06*bop);
+  s.style.setProperty('--s-boxbg', on ? boxFillCol : 'transparent');
+  s.style.setProperty('--s-boxborder', (cfg.box.borderOn!==false) ? `1px solid ${boxEdge}` : '1px solid transparent');
   s.style.setProperty('--s-boxradius', (cfg.box.radius||0)+'px');
+  const setClr=(k,v)=>{ if(v) s.style.setProperty(k,v); else s.style.removeProperty(k); };
+  const W=cfg.weap||{};
+  setClr('--s-whbg', W.headBg); setClr('--s-whfg', W.headFg);
+  setClr('--s-wline', W.border); setClr('--s-wtext', W.text);
+  const N=cfg.notes||{};
+  setClr('--s-nbg', N.bg); setClr('--s-ntext', N.fg);
+  setClr('--s-nborder', N.border ? `1px solid ${N.border}` : '');
   s.style.setProperty('--s-edge', cfg.shape.borderColor || rgbaOf(cfg.fg,.35));
   s.style.setProperty('--s-weapb', (cfg.weapBorder||0)+'px');
   s.style.setProperty('--s-bw', (cfg.shape.borderW||0)+'px');
@@ -624,6 +749,9 @@ function applyTheme(){
   s.style.setProperty('--s-label', cfg.col.label || rgbaOf(cfg.fg,.85));
   s.style.setProperty('--s-value', cfg.col.value || cfg.accent);
   s.style.setProperty('--s-hfcol', cfg.col.hf || cfg.fg);
+  s.style.setProperty('--s-ic1', cfg.iconColor || cfg.accent);
+  s.style.setProperty('--s-ic2', cfg.iconColor2 || cfg.accent);
+  s.style.setProperty('--s-zebra', (cfg.zebra && cfg.zebra.on) ? (cfg.zebra.color || rgbaOf(cfg.fg,.06)) : 'transparent');
 }
 function applyLayout(){
   const s=document.getElementById('sheet'), L=cfg.layout;
@@ -675,31 +803,61 @@ function refreshComputed(){
   pad.querySelectorAll('[data-derived]').forEach(el=>{ el.textContent=cfg.values[el.dataset.derived]; });
 }
 
-/* ===== 굴림 결과 카드 미리보기 ===== */
-const SAMPLE_CARDS = [
-  { title:'기능 판정 — 관찰력', target:'50 / 25 / 10', roll:'08', tier:'extreme', label:'극단적 성공' },
-  { title:'능력치 판정 — 근력', target:'80 / 40 / 16', roll:'37', tier:'hard',    label:'어려운 성공' },
-  { title:'기능 판정 — 회계', target:'05 / 02 / 01', roll:'63', tier:'success',  label:'성공' },
-  { title:'이성 판정 — SAN',  target:'40 / 20 / 08', roll:'100', tier:'fumble',  label:'대실패' }
+/* ===== 굴림 결과 카드 미리보기 (이미지2 형식) ===== */
+// 단계 판정 — 내보내기 rolltemplate와 동일 규칙
+function tierOf(roll, success){
+  const hard=Math.floor(success/2), extreme=Math.floor(success/5);
+  if(roll===1) return ['대성공','crit'];
+  if(roll>=2 && roll<=success){
+    if(roll>hard) return ['성공','success'];
+    if(roll>extreme) return ['어려운 성공','hard'];
+    return ['극단적 성공','extreme'];
+  }
+  if(success>=50) return roll===100 ? ['대실패','fumble'] : ['실패','fail'];
+  return roll>95 ? ['대실패','fumble'] : ['실패','fail'];
+}
+function tierCell(roll, success){ const [l,c]=tierOf(roll,success); return `<td class="rc-v tier-${c}">${l}</td>`; }
+const p2 = n => String(n).padStart(2,'0');
+// 보너스/페널티 예시 (주사위 3개)
+const SAMPLE_BP = { title:'기능 판정 — 오컬트', success:5, rolls:[16,98,24] };
+// 단일 굴림 예시
+const SAMPLE_SINGLE = [
+  { title:'기능 판정 — 관찰력', success:50, roll:8 },
+  { title:'능력치 판정 — 근력', success:80, roll:37 },
+  { title:'이성 판정 — SAN',  success:40, roll:100 }
 ];
 function renderRollCards(){
-  const wrap=document.getElementById('rollCards'); if(!wrap) return;
-  wrap.innerHTML = SAMPLE_CARDS.map(c=>
-    `<div class="rollcard"><div class="rc-title">${c.title}</div>`+
-    `<table class="rc-tbl">`+
-    `<tr><td class="rc-l">목표값</td><td class="rc-v">${c.target}</td></tr>`+
-    `<tr><td class="rc-l">굴림</td><td class="rc-v">${c.roll}</td></tr>`+
-    `<tr><td class="rc-l">결과</td><td class="rc-v tier-${c.tier}">${c.label}</td></tr>`+
-    `</table></div>`).join('');
+  const rimg=imgSrc('rollImg',cfg.rollImg);
+  const cst = rimg ? ` style="background-image:url('${rimg}')"` : '';
+  const s=SAMPLE_BP, hard=Math.floor(s.success/2), ext=Math.floor(s.success/5);
+  const [r1,r2,r3]=s.rolls;
+  const lv=[['+2',Math.min(r1,r2,r3)],['+1',Math.min(r1,r2)],['0',r1],['-1',Math.max(r1,r2)],['-2',Math.max(r1,r2,r3)]];
+  const bp =
+    `<div class="rollcard"${cst}><div class="rc-title">${s.title}</div><table class="rc-tbl">`+
+    `<tr><td class="rc-l">기준치</td><td class="rc-v">${s.success} / ${hard} / ${ext}</td></tr>`+
+    `<tr><td class="rc-l">굴림</td><td class="rc-v">${s.rolls.map(p2).join(', ')}</td></tr>`+
+    lv.map(([lab,v])=>`<tr><td class="rc-l">${lab}</td>${tierCell(v,s.success)}</tr>`).join('')+
+    `</table></div>`;
+  const singles = SAMPLE_SINGLE.map(c=>{
+    const h=Math.floor(c.success/2), e=Math.floor(c.success/5);
+    return `<div class="rollcard"${cst}><div class="rc-title">${c.title}</div><table class="rc-tbl">`+
+      `<tr><td class="rc-l">기준치</td><td class="rc-v">${c.success} / ${h} / ${e}</td></tr>`+
+      `<tr><td class="rc-l">굴림</td><td class="rc-v">${p2(c.roll)}</td></tr>`+
+      `<tr><td class="rc-l">판정결과</td>${tierCell(c.roll,c.success)}</tr>`+
+      `</table></div>`;
+  }).join('');
+  const html = bp + singles;
+  ['rollCards'].forEach(id=>{ const w=document.getElementById(id); if(w) w.innerHTML=html; });
 }
 function applyRollDesign(){
-  const r=cfg.roll, el=document.getElementById('rollPreview'); if(!el) return;
-  const mid=imgSrc('midBg',cfg.midBgImg);
-  const map={ '--rc-card':r.cardBg, '--rc-cardimg':(mid?`url("${mid}")`:'none'),
+  const r=cfg.roll;
+  const map={ '--rc-card':r.cardBg,
+    '--rc-borderw':(r.borderW||0)+'px',
     '--rc-titlebg':r.titleBg, '--rc-titlefg':r.titleFg,
     '--rc-border':r.border, '--rc-body':r.bodyFg, '--t-crit':r.crit, '--t-extreme':r.extreme,
     '--t-hard':r.hard, '--t-success':r.success, '--t-fail':r.fail, '--t-fumble':r.fumble };
-  for(const k in map) el.style.setProperty(k, map[k]);
+  ['rollPreview'].forEach(id=>{ const el=document.getElementById(id); if(!el) return; for(const k in map) el.style.setProperty(k, map[k]); });
+  renderRollCards();
 }
 function bindEditable(){
   pad.querySelectorAll('[data-num]').forEach(el=> el.addEventListener('input',()=>{ cfg.values[el.dataset.num]=el.textContent.trim(); refreshComputed(); }));
@@ -712,9 +870,10 @@ function bindEditable(){
   const add=document.getElementById('addSkill');
   if(add) add.addEventListener('click',()=>{ cfg.customSkills.push({name:'새 기능',value:0}); buildSheet(); });
   pad.querySelectorAll('[data-w]').forEach(el=> el.addEventListener('input',()=>{ cfg.customWeapons[+el.dataset.wi][el.dataset.w]=el.textContent.trim(); }));
+  pad.querySelectorAll('[data-wdb]').forEach(cb=> cb.addEventListener('change',()=>{ cfg.customWeapons[+cb.dataset.wdb].db=cb.checked; buildSheet(); }));
   pad.querySelectorAll('[data-delweap]').forEach(b=> b.addEventListener('click',()=>{ cfg.customWeapons.splice(+b.dataset.delweap,1); buildSheet(); }));
   const addW=document.getElementById('addWeapon');
-  if(addW) addW.addEventListener('click',()=>{ cfg.customWeapons.push({name:'새 무기',skill:'',dmg:'',range:'',atk:'1',ammo:'',malf:''}); buildSheet(); });
+  if(addW) addW.addEventListener('click',()=>{ cfg.customWeapons.push({name:'새 무기',skill:'',dmg:'',range:'',atk:'1',ammo:'',malf:'',db:true}); buildSheet(); });
 }
 
 /* ===== 제작탭 ===== */
@@ -726,29 +885,40 @@ document.querySelectorAll('.tabs button').forEach(b=> b.onclick=()=>{
 document.getElementById('img-top').addEventListener('input',e=>{ cfg.topImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-bg').addEventListener('input',e=>{ cfg.bgImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-topbg').addEventListener('input',e=>{ cfg.topBgImg=e.target.value.trim(); applyImages(); });
-document.getElementById('img-midbg').addEventListener('input',e=>{ cfg.midBgImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-botbg').addEventListener('input',e=>{ cfg.botBgImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-icon').addEventListener('input',e=>{ cfg.iconImg=e.target.value.trim(); applyImages(); });
 document.getElementById('img-icon2').addEventListener('input',e=>{ cfg.iconImg2=e.target.value.trim(); applyImages(); });
+(function(){
+  const c1=document.getElementById('ic1-color'), c1h=document.getElementById('ic1-color-h'),
+        c2=document.getElementById('ic2-color'), c2h=document.getElementById('ic2-color-h');
+  function init(){ const a=cfg.iconColor||cfg.accent, b=cfg.iconColor2||cfg.accent; c1.value=a; c1h.value=a; c2.value=b; c2h.value=b; }
+  init();
+  function set1(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.iconColor=v; c1.value=v; c1h.value=v; applyTheme(); buildSheet(); } }
+  function set2(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.iconColor2=v; c2.value=v; c2h.value=v; applyTheme(); buildSheet(); } }
+  c1.addEventListener('input',()=>set1(c1.value)); c1h.addEventListener('input',()=>set1(c1h.value));
+  c2.addEventListener('input',()=>set2(c2.value)); c2h.addEventListener('input',()=>set2(c2h.value));
+  window.__icColorInit=init;
+})();
 
-/* ── 깃허브 저장소 설정 ── */
+/* ── GitHub 저장소 → raw 링크 자동 생성 ── */
 ['user','repo','branch','folder'].forEach(k=>{
   const el=document.getElementById('gh-'+k);
+  if(!el) return;
   el.value=cfg.gh[k]||'';
   el.addEventListener('input',()=>{ cfg.gh[k]=el.value.trim(); });
 });
 function rawUrl(filename){
-  const g=cfg.gh; if(!g.user||!g.repo) return '';
-  const path=[g.branch||'main', g.folder||'images', filename].map(encodeURIComponent).join('/');
+  const g=cfg.gh; if(!g.user||!g.repo||!filename) return '';
+  const path=[g.branch||'main', g.folder, filename].filter(Boolean).map(encodeURIComponent).join('/');
   return `https://raw.githubusercontent.com/${encodeURIComponent(g.user)}/${encodeURIComponent(g.repo)}/${path}`;
 }
-
-/* ── 모든 이미지 입력에 ‘파일’ 업로드 버튼 부착 ── */
+/* ── 파일 첨부 → 미리보기 즉시 표시 + 깃허브 raw 링크 자동 입력 ── */
 function attachUpload(input, key){
+  if(!input) return;
   const wrap=document.createElement('div'); wrap.className='uprow';
   input.parentNode.insertBefore(wrap, input);
   wrap.appendChild(input);
-  const btn=document.createElement('label'); btn.className='upbtn'; btn.textContent='파일';
+  const btn=document.createElement('label'); btn.className='upbtn'; btn.textContent='파일 첨부';
   const file=document.createElement('input'); file.type='file'; file.accept='image/*'; file.hidden=true;
   btn.appendChild(file); wrap.appendChild(btn);
   const name=document.createElement('div'); name.className='upname';
@@ -759,20 +929,28 @@ function attachUpload(input, key){
     r.onload=()=>{
       cfg.uploads[key]={ name:f.name, dataUrl:r.result };
       const link=rawUrl(f.name);
-      if(link){ input.value=link; input.dispatchEvent(new Event('input')); name.textContent='깃허브 링크 자동 입력됨 · '+f.name+' 을(를) 저장소에 커밋하세요'; }
-      else { name.textContent='미리보기 표시됨 · '+f.name+' (Roll20에는 URL 필요 — 저장소 정보를 채우세요)'; }
-      applyImages();
+      if(link){ input.value=link; input.dispatchEvent(new Event('input'));
+        name.textContent='깃허브 링크 자동 입력됨 · '+f.name+' 을(를) 저장소 폴더에 커밋하세요'; }
+      else { name.textContent='미리보기 표시됨 · '+f.name+' (Roll20용 링크는 위 GitHub 저장소 정보를 채우세요)'; }
+      buildSheet();
     };
     r.readAsDataURL(f);
   });
 }
-attachUpload(document.getElementById('img-top'),'top');
-attachUpload(document.getElementById('img-bg'),'bg');
-attachUpload(document.getElementById('img-topbg'),'topBg');
-attachUpload(document.getElementById('img-midbg'),'midBg');
-attachUpload(document.getElementById('img-botbg'),'botBg');
-attachUpload(document.getElementById('img-icon'),'icon');
-attachUpload(document.getElementById('img-icon2'),'icon2');
+[['img-top','top'],['img-bg','bg'],['img-topbg','topBg'],['img-botbg','botBg'],
+ ['img-icon','icon'],['img-icon2','icon2'],['img-rollbg','rollImg']]
+  .forEach(([id,key])=> attachUpload(document.getElementById(id), key));
+
+/* 롤 템플릿 전용 이미지 + 표 테두리 두께 */
+(function(){
+  const ri=document.getElementById('img-rollbg');
+  if(ri){ ri.value=cfg.rollImg||''; ri.addEventListener('input',e=>{ cfg.rollImg=e.target.value.trim(); applyRollDesign(); }); }
+  const rb=document.getElementById('roll-bw'), rbn=document.getElementById('roll-bw-n');
+  if(rb){ rb.value=cfg.roll.borderW; rbn.value=cfg.roll.borderW;
+    const set=v=>{ v=Math.max(0,Math.min(6,parseInt(v)||0)); cfg.roll.borderW=v; rb.value=v; rbn.value=v; applyRollDesign(); };
+    rb.addEventListener('input',()=>set(rb.value)); rbn.addEventListener('input',()=>set(rbn.value));
+  }
+})();
 
 /* ── 슬롯별 고정 크기(가로×세로 px) 입력 ── */
 function attachSize(inputId, key){
@@ -789,7 +967,7 @@ function attachSize(inputId, key){
     buildSheet();   // 아이콘은 재빌드가 필요, 배경/배너는 applyImages로 충분하나 일괄 처리
   }));
 }
-[['img-top','top'],['img-bg','bg'],['img-topbg','topBg'],['img-midbg','midBg'],
+[['img-top','top'],['img-topbg','topBg'],
  ['img-botbg','botBg'],['img-icon','icon'],['img-icon2','icon2']].forEach(([id,k])=> attachSize(id,k));
 
 function colorPair(picker,hex,key){
@@ -804,9 +982,80 @@ colorPair('c-fg','h-fg','fg'); colorPair('c-bg','h-bg','bg'); colorPair('c-ac','
 const boxOn=document.getElementById('box-on'), boxR=document.getElementById('box-radius'), boxRN=document.getElementById('box-radius-n');
 boxOn.checked=cfg.box.on; boxR.value=cfg.box.radius; boxRN.value=cfg.box.radius;
 boxOn.addEventListener('change',()=>{ cfg.box.on=boxOn.checked; applyTheme(); });
+const boxBorderOn=document.getElementById('box-border-on');
+boxBorderOn.checked=cfg.box.borderOn!==false;
+boxBorderOn.addEventListener('change',()=>{ cfg.box.borderOn=boxBorderOn.checked; applyTheme(); });
 function setRadius(v){ v=Math.max(0,parseInt(v)||0); cfg.box.radius=v; boxR.value=Math.min(v,30); boxRN.value=v; applyTheme(); }
 boxR.addEventListener('input',()=>setRadius(boxR.value));
 boxRN.addEventListener('input',()=>setRadius(boxRN.value));
+const boxCol=document.getElementById('box-color'), boxColH=document.getElementById('box-color-h');
+const boxFill=document.getElementById('box-fill'), boxFillH=document.getElementById('box-fill-h');
+(function(){ const v=cfg.box.color||cfg.fg; boxCol.value=v; boxColH.value=v;
+  const f=cfg.box.fill||cfg.bg; boxFill.value=f; boxFillH.value=f; })();
+function setBoxColor(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.box.color=v; boxCol.value=v; boxColH.value=v; applyTheme(); } }
+function setBoxFill(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.box.fill=v; boxFill.value=v; boxFillH.value=v; applyTheme(); } }
+boxCol.addEventListener('input',()=>setBoxColor(boxCol.value));
+boxColH.addEventListener('input',()=>setBoxColor(boxColH.value));
+boxFill.addEventListener('input',()=>setBoxFill(boxFill.value));
+boxFillH.addEventListener('input',()=>setBoxFill(boxFillH.value));
+document.getElementById('box-color-reset').addEventListener('click',()=>{ cfg.box.color=''; cfg.box.fill=''; boxCol.value=cfg.fg; boxColH.value=cfg.fg; boxFill.value=cfg.bg; boxFillH.value=cfg.bg; applyTheme(); });
+/* 박스 채움 투명도 */
+const boxOp=document.getElementById('box-op'), boxOpN=document.getElementById('box-op-n');
+(function(){ const v=(cfg.box.fillOpacity==null?100:cfg.box.fillOpacity); boxOp.value=v; boxOpN.value=v; })();
+function setBoxOp(v){ v=Math.max(0,Math.min(100,parseInt(v)||0)); cfg.box.fillOpacity=v; boxOp.value=v; boxOpN.value=v; applyTheme(); }
+boxOp.addEventListener('input',()=>setBoxOp(boxOp.value));
+boxOpN.addEventListener('input',()=>setBoxOp(boxOpN.value));
+
+/* 무기표 색 · 기타칸 색 (중첩키) */
+function subColorPair(picker,hex,getObj,key,fallback){
+  const p=document.getElementById(picker), h=document.getElementById(hex);
+  if(!p||!h) return null;
+  const init=()=>{ const v=getObj()[key]||fallback(); p.value=v; h.value=v; };
+  init();
+  const set=v=>{ if(/^#[0-9a-fA-F]{6}$/.test(v)){ getObj()[key]=v; p.value=v; h.value=v; applyTheme(); } };
+  p.addEventListener('input',()=>set(p.value));
+  h.addEventListener('input',()=>set(h.value));
+  return init;
+}
+const wInit=[
+  subColorPair('w-hbg','w-hbg-h',()=>cfg.weap,'headBg',()=>cfg.bg),
+  subColorPair('w-hfg','w-hfg-h',()=>cfg.weap,'headFg',()=>cfg.accent),
+  subColorPair('w-line','w-line-h',()=>cfg.weap,'border',()=>cfg.fg),
+  subColorPair('w-text','w-text-h',()=>cfg.weap,'text',()=>cfg.fg)
+];
+const wReset=document.getElementById('w-reset');
+if(wReset) wReset.addEventListener('click',()=>{ cfg.weap={headBg:'',headFg:'',border:'',text:''}; wInit.forEach(f=>f&&f()); applyTheme(); });
+const nInit=[
+  subColorPair('n-bg','n-bg-h',()=>cfg.notes,'bg',()=>cfg.bg),
+  subColorPair('n-text','n-text-h',()=>cfg.notes,'fg',()=>cfg.fg),
+  subColorPair('n-border','n-border-h',()=>cfg.notes,'border',()=>cfg.fg)
+];
+const nReset=document.getElementById('n-reset');
+if(nReset) nReset.addEventListener('click',()=>{ cfg.notes={bg:'',fg:'',border:''}; nInit.forEach(f=>f&&f()); applyTheme(); });
+
+/* 배경 그라데이션 */
+const gradOn=document.getElementById('grad-on'), gradC1=document.getElementById('grad-c1'), gradC1H=document.getElementById('grad-c1-h'),
+      gradC2=document.getElementById('grad-c2'), gradC2H=document.getElementById('grad-c2-h'),
+      gradAng=document.getElementById('grad-ang'), gradAngN=document.getElementById('grad-ang-n');
+function gradInit(){
+  cfg.grad = Object.assign({ on:false, c1:'#f4eeb0', c2:'#e0d27a', angle:135 }, cfg.grad||{});
+  gradOn.checked=!!cfg.grad.on;
+  gradC1.value=cfg.grad.c1; gradC1H.value=cfg.grad.c1;
+  gradC2.value=cfg.grad.c2; gradC2H.value=cfg.grad.c2;
+  gradAng.value=cfg.grad.angle; gradAngN.value=cfg.grad.angle;
+}
+gradInit();
+gradOn.addEventListener('change',()=>{ cfg.grad.on=gradOn.checked; applyImages(); });
+function setGradC(which,v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.grad[which]=v;
+  (which==='c1'?[gradC1,gradC1H]:[gradC2,gradC2H]).forEach(el=>el.value=v);
+  if(!cfg.grad.on){ cfg.grad.on=true; gradOn.checked=true; } applyImages(); } }
+gradC1.addEventListener('input',()=>setGradC('c1',gradC1.value));
+gradC1H.addEventListener('input',()=>setGradC('c1',gradC1H.value));
+gradC2.addEventListener('input',()=>setGradC('c2',gradC2.value));
+gradC2H.addEventListener('input',()=>setGradC('c2',gradC2H.value));
+function setGradAng(v){ v=Math.max(0,Math.min(360,parseInt(v)||0)); cfg.grad.angle=v; gradAng.value=v; gradAngN.value=v; applyImages(); }
+gradAng.addEventListener('input',()=>setGradAng(gradAng.value));
+gradAngN.addEventListener('input',()=>setGradAng(gradAngN.value));
 
 /* 무기 표 선 두께 */
 const weapB=document.getElementById('weapb'), weapBN=document.getElementById('weapb-n');
@@ -870,12 +1119,25 @@ function granColor(id,key,fb){
   const set=v=>{ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.col[key]=v; p.value=v; h.value=v; applyTheme(); } };
   p.addEventListener('input',()=>set(p.value)); h.addEventListener('input',()=>set(h.value));
 }
-const GRAN=[['cg-header','header',()=>cfg.accent],['cg-label','label',()=>cfg.fg],['cg-value','value',()=>cfg.accent],['cg-chip','chip',()=>cfg.accent],['cg-hf','hf',()=>cfg.fg]];
+const GRAN=[['cg-header','header',()=>cfg.accent],['cg-label','label',()=>cfg.fg],['cg-value','value',()=>cfg.accent],['cg-chip','chip',()=>cfg.accent],['cg-chiptext','chipText',()=>contrastOf(cfg.col.chip||cfg.accent)],['cg-hf','hf',()=>cfg.fg]];
 GRAN.forEach(([id,key,fb])=> granColor(id,key,fb));
 document.getElementById('cg-reset').onclick=()=>{
-  cfg.col={header:'',label:'',value:'',chip:'',hf:''}; applyTheme();
+  cfg.col={header:'',label:'',value:'',chip:'',chipText:'',hf:''}; applyTheme();
   GRAN.forEach(([id,key,fb])=>{ const v=fb(); document.getElementById(id).value=v; document.getElementById(id+'-h').value=v; });
 };
+
+/* 기능 줄무늬 */
+const zebOn=document.getElementById('zebra-on'), zebC=document.getElementById('zebra-color'), zebCH=document.getElementById('zebra-color-h');
+function zebInit(){
+  zebOn.checked=!!(cfg.zebra&&cfg.zebra.on);
+  const v=(cfg.zebra&&cfg.zebra.color)||'#e9e4a8';
+  zebC.value=v; zebCH.value=v;
+}
+zebInit();
+zebOn.addEventListener('change',()=>{ cfg.zebra.on=zebOn.checked; applyTheme(); });
+function setZeb(v){ if(/^#[0-9a-fA-F]{6}$/.test(v)){ cfg.zebra.color=v; zebC.value=v; zebCH.value=v; if(!cfg.zebra.on){cfg.zebra.on=true; zebOn.checked=true;} applyTheme(); } }
+zebC.addEventListener('input',()=>setZeb(zebC.value));
+zebCH.addEventListener('input',()=>setZeb(zebCH.value));
 
 /* 결과값(굴림 카드) 색상 바인딩 */
 const ROLL_KEYS=['cardBg','titleBg','titleFg','border','bodyFg','crit','extreme','hard','success','fail','fumble'];
@@ -904,6 +1166,9 @@ function setColors(fg,bg,ac){
 const tWinter=document.getElementById('t-winter');
 tWinter.value=cfg.winter;
 tWinter.addEventListener('input',()=>{ cfg.winter=tWinter.value; const w=document.getElementById('winterTxt'); if(w) w.textContent=cfg.winter; });
+const tWinterOn=document.getElementById('t-winter-on');
+tWinterOn.checked=cfg.dividerOn!==false;
+tWinterOn.addEventListener('change',()=>{ cfg.dividerOn=tWinterOn.checked; buildSheet(); });
 
 /* ===== 저장 / 불러오기 ===== */
 document.getElementById('bSave').onclick=()=>download('coc-builder.json', JSON.stringify(cfg,null,2),'application/json');
@@ -915,20 +1180,29 @@ document.getElementById('fileIn').onchange=e=>{
   r.readAsText(f);
 };
 function syncInputs(){
-  cfg.gh = cfg.gh || { user:'', repo:'', branch:'main', folder:'images' };
+  cfg.gh = Object.assign({ user:'', repo:'', branch:'main', folder:'images' }, cfg.gh||{});
   cfg.uploads = cfg.uploads || {};
   cfg.customSkills = cfg.customSkills || [];
   cfg.customWeapons = cfg.customWeapons || [];
-  cfg.box = Object.assign({ on:true, radius:4 }, cfg.box||{});
+  cfg.box = Object.assign({ on:true, radius:4, color:'', fill:'', borderOn:true, fillOpacity:100 }, cfg.box||{});
+  if(typeof boxBorderOn!=='undefined' && boxBorderOn) boxBorderOn.checked=cfg.box.borderOn!==false;
+  if(typeof boxCol!=='undefined' && boxCol){ const v=cfg.box.color||cfg.fg; boxCol.value=v; boxColH.value=v;
+    const f=cfg.box.fill||cfg.bg; boxFill.value=f; boxFillH.value=f; }
+  if(typeof boxOp!=='undefined' && boxOp){ const v=(cfg.box.fillOpacity==null?100:cfg.box.fillOpacity); boxOp.value=v; boxOpN.value=v; }
+  cfg.weap = Object.assign({ headBg:'', headFg:'', border:'', text:'' }, cfg.weap||{});
+  cfg.notes = Object.assign({ bg:'', fg:'', border:'' }, cfg.notes||{});
+  if(typeof wInit!=='undefined') wInit.forEach(f=>f&&f());
+  if(typeof nInit!=='undefined') nInit.forEach(f=>f&&f());
   if(typeof cfg.weapBorder!=='number') cfg.weapBorder=1;
   if(weapB){ weapB.value=cfg.weapBorder; weapBN.value=cfg.weapBorder; }
   cfg.overlay = Object.assign({ color:'#000000', opacity:0 }, cfg.overlay||{});
+  if(typeof gradInit==='function') gradInit();
   cfg.layout = Object.assign({ width:850, padding:26, skillCols:3, infoWidth:44, sectionGap:22 }, cfg.layout||{});
   cfg.shape = Object.assign({ borderW:1, radius:8, borderColor:'', underline:1 }, cfg.shape||{});
-  cfg.col = Object.assign({ header:'', label:'', value:'', chip:'', hf:'' }, cfg.col||{});
+  cfg.col = Object.assign({ header:'', label:'', value:'', chip:'', chipText:'', hf:'' }, cfg.col||{});
   ['bd-w','bd-rad','bd-ul'].forEach(id=>{ const k={'bd-w':'borderW','bd-rad':'radius','bd-ul':'underline'}[id]; const r=document.getElementById(id), n=document.getElementById(id+'-n'); if(r){ r.value=cfg.shape[k]; n.value=cfg.shape[k]; } });
   (function(){ const bc=document.getElementById('bd-color'); if(bc){ const v=cfg.shape.borderColor||cfg.fg; bc.value=v; document.getElementById('bd-color-h').value=v; } })();
-  [['cg-header','header',cfg.accent],['cg-label','label',cfg.fg],['cg-value','value',cfg.accent],['cg-chip','chip',cfg.accent],['cg-hf','hf',cfg.fg]].forEach(([id,k,fb])=>{ const p=document.getElementById(id); if(p){ const v=cfg.col[k]||fb; p.value=v; document.getElementById(id+'-h').value=v; } });
+  [['cg-header','header',cfg.accent],['cg-label','label',cfg.fg],['cg-value','value',cfg.accent],['cg-chip','chip',cfg.accent],['cg-chiptext','chipText',contrastOf(cfg.col.chip||cfg.accent)],['cg-hf','hf',cfg.fg]].forEach(([id,k,fb])=>{ const p=document.getElementById(id); if(p){ const v=cfg.col[k]||fb; p.value=v; document.getElementById(id+'-h').value=v; } });
   if(ovC){ ovC.value=cfg.overlay.color; ovCH.value=cfg.overlay.color; ovO.value=Math.round(cfg.overlay.opacity*100); ovON.value=Math.round(cfg.overlay.opacity*100); }
   [['ly-width','width'],['ly-pad','padding'],['ly-infow','infoWidth'],['ly-secgap','sectionGap']].forEach(([id,k])=>{
     const r=document.getElementById(id), n=document.getElementById(id+'-n'); if(r){ r.value=cfg.layout[k]; n.value=cfg.layout[k]; }
@@ -936,11 +1210,15 @@ function syncInputs(){
   document.querySelectorAll('[data-cols]').forEach(x=> x.classList.toggle('on', +x.dataset.cols===cfg.layout.skillCols));
   applyLayout();
   boxOn.checked=cfg.box.on; boxR.value=Math.min(cfg.box.radius,30); boxRN.value=cfg.box.radius;
-  cfg.size = Object.assign({ top:{w:600,h:230}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300}, botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14} }, cfg.size||{});
+  cfg.size = Object.assign({ top:{w:600,h:400}, bg:{w:850,h:1400}, topBg:{w:850,h:400}, midBg:{w:850,h:300}, botBg:{w:850,h:400}, icon:{w:14,h:14}, icon2:{w:14,h:14}, rollBg:{w:700,h:1000} }, cfg.size||{});
   document.querySelectorAll('.sizerow input[data-szk]').forEach(inp=>{
     const z=cfg.size[inp.dataset.szk]; if(z) inp.value=z[inp.dataset.sz];
   });
-  cfg.roll = Object.assign({ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d', crit:'#6a3fb0', extreme:'#1f7a44', hard:'#2e6e91', success:'#2a4d63', fail:'#b0602a', fumble:'#9e2a2a' }, cfg.roll||{});
+  cfg.roll = Object.assign({ cardBg:'#f4eeb0', titleBg:'#2e6e91', titleFg:'#f6f1cf', border:'#c2ad4d', bodyFg:'#233b4d', borderW:1, crit:'#6a3fb0', extreme:'#1f7a44', hard:'#2e6e91', success:'#2a4d63', fail:'#b0602a', fumble:'#9e2a2a' }, cfg.roll||{});
+  if(typeof cfg.roll.borderW!=='number') cfg.roll.borderW=1;
+  if(typeof cfg.rollImg!=='string') cfg.rollImg='';
+  { const ri=document.getElementById('img-rollbg'); if(ri) ri.value=cfg.rollImg||''; }
+  { const rb=document.getElementById('roll-bw'); if(rb){ rb.value=cfg.roll.borderW; document.getElementById('roll-bw-n').value=cfg.roll.borderW; } }
   ['cardBg','titleBg','titleFg','border','bodyFg','crit','extreme','hard','success','fail','fumble'].forEach(k=>{
     const p=document.getElementById('rc-'+k), h=document.getElementById('rh-'+k);
     if(p){ p.value=cfg.roll[k]; h.value=cfg.roll[k]; }
@@ -949,50 +1227,116 @@ function syncInputs(){
   document.getElementById('img-top').value=cfg.topImg||'';
   document.getElementById('img-bg').value=cfg.bgImg||'';
   document.getElementById('img-topbg').value=cfg.topBgImg||'';
-  document.getElementById('img-midbg').value=cfg.midBgImg||'';
   document.getElementById('img-botbg').value=cfg.botBgImg||'';
   document.getElementById('img-icon').value=cfg.iconImg||'';
   document.getElementById('img-icon2').value=cfg.iconImg2||'';
+  if(typeof cfg.iconColor!=='string') cfg.iconColor='';
+  if(typeof cfg.iconColor2!=='string') cfg.iconColor2='';
+  if(window.__icColorInit) window.__icColorInit();
   ['user','repo','branch','folder'].forEach(k=>{ const el=document.getElementById('gh-'+k); if(el) el.value=cfg.gh[k]||''; });
   setColors(cfg.fg,cfg.bg,cfg.accent);
   tWinter.value=cfg.winter;
+  if(typeof cfg.dividerOn!=='boolean') cfg.dividerOn=true;
+  if(tWinterOn) tWinterOn.checked=cfg.dividerOn;
+  cfg.zebra = Object.assign({ on:false, color:'' }, cfg.zebra||{});
+  if(cfg.values.luck==null) cfg.values.luck=50;
+  if(cfg.values.luck_max==null) cfg.values.luck_max=99;
+  if(typeof zebInit==='function') zebInit();
 }
 
 /* ===== 내보내기 ===== */
 function cocRollVal(name, targetExpr, bonus){
-  const roll = bonus ? '?{보너스·페널티|보너스,2d100kl1|페널티,2d100kh1}' : '1d100';
   const nm = bonus ? name+' (보너스/페널티)' : name;
-  return `&{template:coc} {{name=${nm}}} {{success=[[${targetExpr}]]}} {{hard=[[floor((${targetExpr})/2)]]}} {{extreme=[[floor((${targetExpr})/5)]]}} {{roll1=[[${roll}]]}}`;
+  const dice = bonus
+    ? `{{roll1=[[1d100]]}} {{roll2=[[1d100]]}} {{roll3=[[1d100]]}}`
+    : `{{roll1=[[1d100]]}}`;
+  return `&{template:coc} {{name=${nm}}} {{success=[[${targetExpr}]]}} {{hard=[[floor((${targetExpr})/2)]]}} {{extreme=[[floor((${targetExpr})/5)]]}} ${dice}`;
 }
-function weaponRollVal(nameAttr, skillAttr, dmgAttr){
-  return `&{template:coc} {{name=@{${nameAttr}}}} {{success=[[@{${skillAttr}}]]}} {{hard=[[floor(@{${skillAttr}}/2)]]}} {{extreme=[[floor(@{${skillAttr}}/5)]]}} {{roll1=[[1d100]]}} {{damage=[[@{${dmgAttr}}@{db_roll}]]}}`;
+function weaponRollVal(nameAttr, skillAttr, dmgAttr, useDb){
+  const dmg = useDb===false ? `@{${dmgAttr}}` : `@{${dmgAttr}}@{db_roll}`;
+  return `&{template:coc} {{name=@{${nameAttr}}}} {{success=[[@{${skillAttr}}]]}} {{hard=[[floor(@{${skillAttr}}/2)]]}} {{extreme=[[floor(@{${skillAttr}}/5)]]}} {{roll1=[[1d100]]}} {{damage=[[${dmg}]]}}`;
+}
+function rtTierTd(r){
+  // 검증된 14쌍 단계 로직 — roll 변수 r에 대한 <td> 하나 출력
+  return [
+`{{#rollTotal() ${r} 1}}<td class="coc-v tier-crit">대성공</td>{{/rollTotal() ${r} 1}}`,
+`{{#rollBetween() ${r} 2 success}}`,
+`{{#rollGreater() ${r} hard}}<td class="coc-v tier-success">성공</td>{{/rollGreater() ${r} hard}}`,
+`{{#rollBetween() ${r} 2 hard}}`,
+`{{#rollGreater() ${r} extreme}}<td class="coc-v tier-hard">어려운 성공</td>{{/rollGreater() ${r} extreme}}`,
+`{{#rollBetween() ${r} 2 extreme}}<td class="coc-v tier-extreme">극단적 성공</td>{{/rollBetween() ${r} 2 extreme}}`,
+`{{/rollBetween() ${r} 2 hard}}`,
+`{{/rollBetween() ${r} 2 success}}`,
+`{{#rollGreater() ${r} success}}`,
+`{{#rollGreater() success 49}}`,
+`{{#rollTotal() ${r} 100}}<td class="coc-v tier-fumble">대실패</td>{{/rollTotal() ${r} 100}}`,
+`{{#rollLess() ${r} 100}}<td class="coc-v tier-fail">실패</td>{{/rollLess() ${r} 100}}`,
+`{{/rollGreater() success 49}}`,
+`{{#rollLess() success 50}}`,
+`{{#rollGreater() ${r} 95}}<td class="coc-v tier-fumble">대실패</td>{{/rollGreater() ${r} 95}}`,
+`{{#rollLess() ${r} 96}}<td class="coc-v tier-fail">실패</td>{{/rollLess() ${r} 96}}`,
+`{{/rollLess() success 50}}`,
+`{{/rollGreater() ${r} success}}`
+  ].join('');
+}
+function rtMin2(a,b){ return `{{#rollLess() ${a} ${b}}}${rtTierTd(a)}{{/rollLess() ${a} ${b}}}{{#rollGreater() ${a} ${b}}}${rtTierTd(b)}{{/rollGreater() ${a} ${b}}}{{#rollTotal() ${a} ${b}}}${rtTierTd(a)}{{/rollTotal() ${a} ${b}}}`; }
+function rtMax2(a,b){ return `{{#rollGreater() ${a} ${b}}}${rtTierTd(a)}{{/rollGreater() ${a} ${b}}}{{#rollLess() ${a} ${b}}}${rtTierTd(b)}{{/rollLess() ${a} ${b}}}{{#rollTotal() ${a} ${b}}}${rtTierTd(a)}{{/rollTotal() ${a} ${b}}}`; }
+function rtMin3(a,b,c){ return `{{#rollLess() ${a} ${b}}}${rtMin2(a,c)}{{/rollLess() ${a} ${b}}}{{#rollGreater() ${a} ${b}}}${rtMin2(b,c)}{{/rollGreater() ${a} ${b}}}{{#rollTotal() ${a} ${b}}}${rtMin2(a,c)}{{/rollTotal() ${a} ${b}}}`; }
+function rtMax3(a,b,c){ return `{{#rollGreater() ${a} ${b}}}${rtMax2(a,c)}{{/rollGreater() ${a} ${b}}}{{#rollLess() ${a} ${b}}}${rtMax2(b,c)}{{/rollLess() ${a} ${b}}}{{#rollTotal() ${a} ${b}}}${rtMax2(a,c)}{{/rollTotal() ${a} ${b}}}`; }
+const MAD_RT = [
+['기억상실','안전한 곳을 떠난 이후의 기억이 모두 사라진다.'],
+['정신신체 장애','일시적으로 눈이 멀거나 귀가 안 들리거나 팔다리를 못 쓴다.'],
+['신체적 히스테리·감정 폭발','웃음·울음·비명 등으로 한동안 행동 불능이 된다.'],
+['폭력','주변·아군·적을 가리지 않고 폭주한다.'],
+['편집증','모두가 자신을 노린다는 극심한 의심에 빠진다.'],
+['망상','환각과 현실을 구분하지 못한다.'],
+['기절','그 자리에서 정신을 잃는다.'],
+['공황 도주','무작정 그 자리에서 달아난다.'],
+['공포증','새로운 공포증을 얻는다(없으면 공포증 표로 결정).'],
+['조증','새로운 조증(집착)을 얻는다(없으면 조증 표로 결정).']
+];
+const MAD_SUMM = [
+['기억상실','안전한 곳 이후의 기억이 사라진 채 정신을 차린다.'],
+['만신창이','멍과 상처투성이로 깨어난다(원인은 기억하지 못함).'],
+['폭력','그동안 폭력과 파괴를 저질러 놓았다.'],
+['이념·신념','자신의 신념에 따라 극단적으로 행동했다.'],
+['중요한 사람','소중한 사람을 향한 집착에 휘둘려 움직였다.'],
+['망상','망상에 사로잡혀 행동했다.'],
+['공황 도주','정신을 차려보니 먼 곳까지 도망쳐 있다.'],
+['속박','묶이거나 갇힌 채 깨어난다.'],
+['공포증','새로운 공포증을 얻는다.'],
+['조증','새로운 조증을 얻는다.']
+];
+function madnessTemplateHtml(name, caption, entries){
+  let rows='';
+  entries.forEach((e,i)=>{
+    const n=i+1;
+    rows += `    {{#rollTotal() roll1 ${n}}}<tr><td class="coc-l">결과</td><td class="coc-v">${n}. ${e[0]}</td></tr><tr><td colspan="2" class="coc-desc">${e[1]}</td></tr>{{/rollTotal() roll1 ${n}}}\n`;
+  });
+  return [
+`<rolltemplate class="sheet-rolltemplate-${name}">`,
+`  <table class="coc-card"><caption>${caption}</caption>`,
+`    <tr><td class="coc-l">굴림 (1d10)</td><td class="coc-v">{{roll1}}</td></tr>`,
+rows+`  </table>`,
+`</rolltemplate>`
+  ].join('\n');
 }
 function rollTemplateHtml(){
   return [
 '<rolltemplate class="sheet-rolltemplate-coc">',
 '  <table class="coc-card"><caption>{{name}}</caption>',
-'    <tr><td class="coc-l">목표값</td><td class="coc-v">{{success}} / {{hard}} / {{extreme}}</td></tr>',
-'    <tr><td class="coc-l">굴림</td><td class="coc-v">{{roll1}}</td></tr>',
-'    <tr><td class="coc-l">결과</td>',
-'      {{#rollTotal() roll1 1}}<td class="coc-v tier-crit">대성공</td>{{/rollTotal() roll1 1}}',
-'      {{#rollBetween() roll1 2 success}}',
-'        {{#rollGreater() roll1 hard}}<td class="coc-v tier-success">성공</td>{{/rollGreater() roll1 hard}}',
-'        {{#rollBetween() roll1 2 hard}}',
-'          {{#rollGreater() roll1 extreme}}<td class="coc-v tier-hard">어려운 성공</td>{{/rollGreater() roll1 extreme}}',
-'          {{#rollBetween() roll1 2 extreme}}<td class="coc-v tier-extreme">극단적 성공</td>{{/rollBetween() roll1 2 extreme}}',
-'        {{/rollBetween() roll1 2 hard}}',
-'      {{/rollBetween() roll1 2 success}}',
-'      {{#rollGreater() roll1 success}}',
-'        {{#rollGreater() success 49}}',
-'          {{#rollTotal() roll1 100}}<td class="coc-v tier-fumble">대실패</td>{{/rollTotal() roll1 100}}',
-'          {{#rollLess() roll1 100}}<td class="coc-v tier-fail">실패</td>{{/rollLess() roll1 100}}',
-'        {{/rollGreater() success 49}}',
-'        {{#rollLess() success 50}}',
-'          {{#rollGreater() roll1 95}}<td class="coc-v tier-fumble">대실패</td>{{/rollGreater() roll1 95}}',
-'          {{#rollLess() roll1 96}}<td class="coc-v tier-fail">실패</td>{{/rollLess() roll1 96}}',
-'        {{/rollLess() success 50}}',
-'      {{/rollGreater() roll1 success}}',
-'    </tr>',
+'    <tr><td class="coc-l">기준치</td><td class="coc-v">{{success}} / {{hard}} / {{extreme}}</td></tr>',
+'    <tr><td class="coc-l">굴림</td><td class="coc-v">{{roll1}}{{#roll2}}, {{roll2}}, {{roll3}}{{/roll2}}</td></tr>',
+'    {{^roll2}}',
+'    <tr><td class="coc-l">판정결과</td>'+rtTierTd('roll1')+'</tr>',
+'    {{/roll2}}',
+'    {{#roll2}}',
+'    <tr><td class="coc-l">+2</td>'+rtMin3('roll1','roll2','roll3')+'</tr>',
+'    <tr><td class="coc-l">+1</td>'+rtMin2('roll1','roll2')+'</tr>',
+'    <tr><td class="coc-l">0</td>'+rtTierTd('roll1')+'</tr>',
+'    <tr><td class="coc-l">-1</td>'+rtMax2('roll1','roll2')+'</tr>',
+'    <tr><td class="coc-l">-2</td>'+rtMax3('roll1','roll2','roll3')+'</tr>',
+'    {{/roll2}}',
 '    {{#damage}}<tr><td class="coc-l">피해</td><td class="coc-v">{{damage}}</td></tr>{{/damage}}',
 '  </table>',
 '</rolltemplate>'
@@ -1000,18 +1344,23 @@ function rollTemplateHtml(){
 }
 function rollTemplateCss(){
   const r=cfg.roll;
-  const mid=exportSrc('midBg',cfg.midBgImg);
-  const cardImg = mid
-    ? `background-color:${r.cardBg}; background-image:url('${mid}'); background-repeat:no-repeat; background-position:bottom center; background-size:100%;`
+  const img=exportSrc('rollImg',cfg.rollImg);
+  const bw=r.borderW||0;
+  const cardImg = img
+    ? `background-color:${r.cardBg}; background-image:url('${img}'); background-repeat:no-repeat; background-position:center; background-size:100% 100%;`
     : `background:${r.cardBg};`;
+  const SELS=['.sheet-rolltemplate-coc','.sheet-rolltemplate-madrt','.sheet-rolltemplate-madsumm'];
+  const P = sub => SELS.map(s=>s+' '+sub).join(',');
   return [
 '',
-'/* 굴림 결과 카드 (rolltemplate) — 레퍼런스 구조: 제목 윗부분 둥글게 / 본문 아래 둥글게 + 가운데 배경을 하단에 공유 */',
-`.sheet-rolltemplate-coc table{ width:100%; max-width:280px; color:${r.bodyFg}; border-collapse:separate; ${cardImg} border-radius:0 0 12px 12px; }`,
-`.sheet-rolltemplate-coc caption{ background:${r.titleBg}; color:${r.titleFg}; font-weight:bold; text-align:center; padding:5px 8px; font-size:14px; border-radius:12px 12px 0 0; }`,
-`.sheet-rolltemplate-coc td{ padding:4px 9px; border-bottom:1px solid ${r.border}; }`,
-'.sheet-rolltemplate-coc .coc-l{ opacity:.65; text-align:left; }',
-'.sheet-rolltemplate-coc .coc-v{ text-align:right; font-weight:600; }',
+'/* 굴림 결과 카드 (rolltemplate) — coc/광기의 발작 공통 + 카드 외곽선·세로형 이미지 */',
+`${P('table')}{ width:100%; max-width:280px; color:${r.bodyFg}; border-collapse:separate; ${cardImg} border-radius:0 0 12px 12px; }`,
+`${P('caption')}{ background:${r.titleBg}; color:${r.titleFg}; font-weight:bold; text-align:center; padding:5px 8px; font-size:14px; border-radius:12px 12px 0 0; }`,
+`${P('td')}{ padding:4px 9px; border-bottom:${bw}px solid ${r.border}; }`,
+`${P('.coc-l')}{ opacity:.65; text-align:left; }`,
+`${P('.coc-v')}{ text-align:right; font-weight:600; }`,
+`${P('.coc-desc')}{ text-align:left; font-weight:400; opacity:.85; font-size:12px; line-height:1.45; }`,
+`${P('.inlinerollresult')}{ background:transparent !important; border:none !important; color:inherit !important; font-weight:inherit !important; padding:0 !important; box-shadow:none !important; }`,
 `.sheet-rolltemplate-coc .tier-crit{ color:${r.crit}; font-weight:800; }`,
 `.sheet-rolltemplate-coc .tier-extreme{ color:${r.extreme}; font-weight:800; }`,
 `.sheet-rolltemplate-coc .tier-hard{ color:${r.hard}; font-weight:700; }`,
@@ -1033,10 +1382,12 @@ function fontFaceCss(){
 function buildCss(){
   const L=[fontFaceCss()];
   const colHeader = cfg.col.header || cfg.accent;
+  const colIc1 = cfg.iconColor || cfg.accent;
+  const colIc2 = cfg.iconColor2 || cfg.accent;
   const colLabel  = cfg.col.label  || rgbaOf(cfg.fg,.85);
   const colValue  = cfg.col.value  || cfg.accent;
   const colChip   = cfg.col.chip   || cfg.accent;
-  const colChipT  = contrastOf(colChip);
+  const colChipT  = cfg.col.chipText || contrastOf(colChip);
   const colHf     = cfg.col.hf     || cfg.fg;
   const edge      = cfg.shape.borderColor || rgbaOf(cfg.fg,.35);
   L.push('/* COC 7th 커스텀 시트 — 빌더 생성 CSS */');
@@ -1059,28 +1410,47 @@ function buildCss(){
   L.push('.charsheet .coc-sheet input,.charsheet .coc-sheet textarea{ background:transparent; border:none; color:var(--accent); font-family:inherit; box-sizing:border-box; }');
   L.push('.charsheet .coc-sheet input[type=number]{ -moz-appearance:textfield; }');
   L.push('.charsheet .coc-sheet input[type=number]::-webkit-inner-spin-button,.charsheet .coc-sheet input[type=number]::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }');
-  const boxBg = cfg.box.on ? rgbaOf(cfg.fg,.06) : 'transparent';
-  const boxBorder = cfg.box.on ? `1px solid ${rgbaOf(cfg.fg,.22)}` : '1px solid transparent';
+  const _bop=(cfg.box.fillOpacity==null?100:cfg.box.fillOpacity)/100;
+  const boxBg = cfg.box.on ? (cfg.box.fill ? rgbaOf(cfg.box.fill,_bop) : rgbaOf(cfg.fg,.06*_bop)) : 'transparent';
+  const boxBorder = (cfg.box.borderOn!==false) ? `1px solid ${cfg.box.color || rgbaOf(cfg.fg,.22)}` : '1px solid transparent';
   const boxRad = (cfg.box.radius||0)+'px';
-  L.push('.charsheet .coc-sheet .top{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; }');
+  const _W=cfg.weap||{}; const wLine=_W.border||'var(--line)';
+  const wHbg=_W.headBg||'transparent'; const wHfg=_W.headFg||colHeader; const wText=_W.text||'inherit';
+  const _N=cfg.notes||{}; const nBg=_N.bg||boxBg; const nText=_N.fg||cfg.fg;
+  const nBorder=_N.border?`1px solid ${_N.border}`:boxBorder;
+  L.push('.charsheet .coc-sheet .top{ display:flex; gap:16px; align-items:stretch; justify-content:space-between; }');
   L.push(`.charsheet .coc-sheet .info{ flex:0 0 ${cfg.layout.infoWidth}%; display:grid; grid-template-columns:auto 1fr auto 1fr; gap:6px 10px; align-items:center; align-content:start; background:${boxBg}; border:${boxBorder}; border-radius:${boxRad}; padding:12px 14px; }`);
   L.push(`.charsheet .coc-sheet .info .k{ font-size:11px; opacity:.6; white-space:nowrap; color:${colLabel}; }`);
   L.push('.charsheet .coc-sheet .info .v{ border-bottom:1px dotted var(--line); min-height:18px; min-width:0; }'); L.push(`.charsheet .coc-sheet .info .v input{ color:${colValue}; }`);
   L.push('.charsheet .coc-sheet .info .v input{ width:100%; }');
-  L.push('.charsheet .coc-sheet .cards{ flex:1; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }');
-  L.push(`.charsheet .coc-sheet .scard{ background:${boxBg}; border:${boxBorder}; border-radius:${boxRad}; padding:8px 6px; text-align:center; min-width:0; }`);
-  L.push('.charsheet .coc-sheet .scard .tag,.charsheet .coc-sheet .scard .accent{ white-space:nowrap; }');
-  L.push('.charsheet .coc-sheet .scard .big input{ font-size:26px; font-weight:bold; text-align:center; width:50px; }');
+  L.push('.charsheet .coc-sheet .cards{ flex:1; display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:8px; }');
+  L.push(`.charsheet .coc-sheet .scard{ background:${boxBg}; border:${boxBorder}; border-radius:${boxRad}; padding:8px 6px; text-align:center; min-width:0; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; }`);
+  L.push(`.charsheet .coc-sheet .scard .cardroll{ display:flex; gap:4px; justify-content:center; align-items:center; min-height:15px; margin-top:5px; line-height:1; }`);
+  L.push(`.charsheet .coc-sheet .scard .lab{ display:inline-block; background:${colChip}; color:${colChipT}; border-radius:11px; padding:2px 12px; font-size:12px; font-weight:bold; letter-spacing:1px; margin-bottom:4px; }`);
+  L.push(`.charsheet .coc-sheet .scard .tag,.charsheet .coc-sheet .scard .accent{ display:inline-block; margin-top:5px; font-size:10px; padding:2px 9px; border-radius:10px; background:${colChip}; color:${colChipT}; white-space:nowrap; }`);
+  L.push('.charsheet .coc-sheet .scard .cm{ display:flex; align-items:baseline; justify-content:center; gap:5px; margin:4px 0 3px; }');
+  L.push(`.charsheet .coc-sheet .scard .cm .cur{ font-size:24px; font-weight:bold; text-align:center; width:48px; color:${colValue}; }`);
+  L.push('.charsheet .coc-sheet .scard .cm .div{ font-size:16px; opacity:.3; }');
+  L.push(`.charsheet .coc-sheet .scard .cm .mx{ font-size:16px; text-align:center; width:40px; opacity:.6; color:${colValue}; }`);
+  L.push('.charsheet .coc-sheet .madrow{ display:flex; align-items:center; justify-content:center; gap:10px; flex-wrap:wrap; margin:16px 0 6px; font-size:12px; }');
+  L.push(`.charsheet .coc-sheet .madrow .madlab{ font-weight:700; color:${colHeader}; letter-spacing:1px; }`);
+  L.push(`.charsheet .coc-sheet button[type=roll].madbtn{ background:${colChip} !important; color:${colChipT} !important; border:none !important; box-shadow:none !important; border-radius:10px !important; padding:2px 10px !important; font-size:11px !important; width:auto !important; height:auto !important; cursor:pointer; }`);
+  L.push('.charsheet .coc-sheet button[type=roll].madbtn::before{ content:"" !important; }');
+  L.push(`.charsheet .coc-sheet .madrow .madstart{ opacity:.85; }`);
+  L.push(`.charsheet .coc-sheet .madrow .madstart input{ width:40px; text-align:center; font-weight:bold; color:${colValue}; }`);
   L.push(`.charsheet .coc-sheet .winter{ text-align:center; font-family:'Nanum Myeongjo','Gowun Batang',serif; font-weight:800; letter-spacing:2px; font-size:26px; color:var(--accent); margin:18px 0; }`);
-  L.push('.charsheet .coc-sheet .chars{ display:grid; grid-template-columns:repeat(9,1fr); gap:6px; text-align:center; margin:14px 0; }');
+  L.push('.charsheet .coc-sheet .chars{ display:grid; grid-template-columns:repeat(8,1fr); gap:6px; text-align:center; margin:14px 0; }');
   L.push(`.charsheet .coc-sheet .chars .c .nm{ font-size:12px; color:${colLabel}; }`);
-  L.push('.charsheet .coc-sheet .chars .c .ic{ display:flex; gap:3px; justify-content:center; align-items:center; height:16px; }');
-  L.push(`.charsheet .coc-sheet .chars input[type=number]{ font-size:20px; font-weight:bold; text-align:center; width:100%; color:${colValue}; }`);
+  L.push('.charsheet .coc-sheet .chars .c .ic{ display:flex; gap:4px; justify-content:center; align-items:center; height:16px; }');
+  L.push('.charsheet .coc-sheet .skill .ic{ display:inline-flex; gap:3px; align-items:center; flex:0 0 auto; }');
+  L.push(`.charsheet .coc-sheet .chars input[type=number]{ font-size:18px; font-weight:bold; text-align:center; width:44px; background:${colChip}; color:${colChipT}; border-radius:12px; padding:2px 0; }`);
   L.push(`.charsheet .coc-sheet .chars .c .hf{ font-size:11px; opacity:.7; display:flex; gap:3px; justify-content:center; color:${colHf}; }`);
   L.push('.charsheet .coc-sheet .hfv{ width:22px; text-align:center; opacity:.85; }');
   L.push(`.charsheet .coc-sheet .skills{ column-count:${cfg.layout.skillCols}; column-gap:24px; }`);
-  L.push('.charsheet .coc-sheet .skill{ display:flex; align-items:center; gap:6px; padding:2px 0; break-inside:avoid; }');
+  L.push(`.charsheet .coc-sheet .skills .skill:nth-child(even){ background:${(cfg.zebra&&cfg.zebra.on)?(cfg.zebra.color||rgbaOf(cfg.fg,.06)):'transparent'}; border-radius:3px; }`);
+  L.push('.charsheet .coc-sheet .skill{ display:flex; align-items:center; gap:7px; padding:2px 0; break-inside:avoid; }');
   L.push(`.charsheet .coc-sheet .skill .nm{ flex:1; color:${colLabel}; }`);
+  L.push(`.charsheet .coc-sheet .skill .skchk{ flex:0 0 13px; width:13px; height:13px; margin:0; accent-color:${colHeader}; cursor:pointer; }`);
   L.push(`.charsheet .coc-sheet .skill input[type=number]{ width:34px; text-align:center; background:${colChip}; color:${colChipT}; border-radius:9px; padding:1px 0; flex:0 0 auto; }`);
   L.push(`.charsheet .coc-sheet .skill .hf2{ font-size:10px; opacity:.62; display:flex; gap:1px; min-width:34px; justify-content:flex-end; color:${colHf}; }`);
   L.push('.charsheet .coc-sheet .skill .hf2 .hfv{ width:16px; }');
@@ -1095,7 +1465,10 @@ function buildCss(){
   L.push('.charsheet .coc-sheet .wrow button{ flex:0 0 auto; background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:3px; font-size:11px; padding:2px 8px; cursor:pointer; }');
   L.push('.charsheet .coc-sheet .repcontrol button{ background:transparent; color:var(--accent); border:1px solid var(--accent); border-radius:3px; font-size:11px; padding:2px 8px; margin:6px 6px 0 0; cursor:pointer; }');
   L.push('.charsheet .coc-sheet table.weap{ width:100%; table-layout:fixed; border-collapse:collapse; font-size:11px; }');
-  L.push(`.charsheet .coc-sheet table.weap th,.charsheet .coc-sheet table.weap td{ border:${cfg.weapBorder||0}px solid var(--line); padding:3px 5px; text-align:center; overflow:hidden; }`);
+  L.push(`.charsheet .coc-sheet table.weap th,.charsheet .coc-sheet table.weap td{ border:${cfg.weapBorder||0}px solid ${wLine}; padding:3px 5px; text-align:center; overflow:hidden; }`);
+  L.push(`.charsheet .coc-sheet table.weap td{ color:${wText}; }`);
+  L.push(`.charsheet .coc-sheet table.weap th{ background:${wHbg}; color:${wHfg}; }`);
+  L.push(`.charsheet .coc-sheet table.weap td input{ color:${wText==='inherit'?'inherit':wText}; }`);
   L.push('.charsheet .coc-sheet table.weap input{ width:100%; box-sizing:border-box; text-align:center; }');
   L.push('.charsheet .coc-sheet table.weap th.wroll,.charsheet .coc-sheet table.weap td.wroll{ width:34px; }');
   L.push('.charsheet .coc-sheet table.weap td.wroll{ text-align:center; }');
@@ -1103,15 +1476,29 @@ function buildCss(){
   L.push('.charsheet .coc-sheet table.weap td.wdmg span{ font-size:10px; opacity:.6; white-space:nowrap; }');
   L.push('');
   L.push('/* 굴림 아이콘 1·2 — 롤20 기본 버튼 스타일(흰 박스·그림자·강제 크기)을 !important로 제거 */');
-  L.push('.charsheet .coc-sheet button[type=roll].rollicon1,.charsheet .coc-sheet button[type=roll].rollicon2{ border:none !important; box-shadow:none !important; background-color:transparent !important; -webkit-appearance:none; appearance:none; width:auto !important; height:auto !important; min-width:0 !important; padding:1px 3px !important; margin:0 !important; line-height:1 !important; vertical-align:middle; cursor:pointer; color:var(--accent) !important; border-radius:3px; }');
+  L.push('.charsheet .coc-sheet button[type=roll].rollicon1,.charsheet .coc-sheet button[type=roll].rollicon2{ border:none !important; box-shadow:none !important; background-color:transparent !important; -webkit-appearance:none; appearance:none; width:auto !important; height:auto !important; min-width:0 !important; padding:0 !important; margin:0 !important; line-height:1 !important; vertical-align:middle; cursor:pointer; color:var(--accent) !important; border-radius:3px; }');
+  L.push(`.charsheet .coc-sheet button[type=roll].rollicon1{ color:${colIc1} !important; }`);
+  L.push(`.charsheet .coc-sheet button[type=roll].rollicon2{ color:${colIc2} !important; }`);
   L.push('/* 롤20 기본 d20 아이콘 제거 → ◆/이미지만 표시 (클릭 굴림은 유지) */');
   L.push('.charsheet .coc-sheet button[type=roll]::before{ content:"" !important; }');
   const _ic1=exportSrc('icon',cfg.iconImg), _ic2=exportSrc('icon2',cfg.iconImg2);
   if(_ic1) L.push(`.charsheet .coc-sheet button[type=roll].rollicon1{ background-image:url('${_ic1}') !important; background-size:contain !important; background-repeat:no-repeat !important; background-position:center !important; width:${cfg.size.icon.w}px !important; height:${cfg.size.icon.h}px !important; padding:0 !important; text-indent:-9999px; overflow:hidden; }`);
-  else     L.push('.charsheet .coc-sheet button[type=roll].rollicon1{ background-image:none !important; font-size:13px !important; }');
+  else     L.push(`.charsheet .coc-sheet button[type=roll].rollicon1{ background-image:none !important; width:${cfg.size.icon.w}px !important; height:${cfg.size.icon.h}px !important; line-height:${cfg.size.icon.h}px !important; text-align:center; padding:0 !important; font-size:13px !important; }`);
   if(_ic2) L.push(`.charsheet .coc-sheet button[type=roll].rollicon2{ background-image:url('${_ic2}') !important; background-size:contain !important; background-repeat:no-repeat !important; background-position:center !important; width:${cfg.size.icon2.w}px !important; height:${cfg.size.icon2.h}px !important; padding:0 !important; text-indent:-9999px; overflow:hidden; }`);
-  else     L.push('.charsheet .coc-sheet button[type=roll].rollicon2{ background-image:none !important; font-size:13px !important; }');
+  else     L.push(`.charsheet .coc-sheet button[type=roll].rollicon2{ background-image:none !important; width:${cfg.size.icon2.w}px !important; height:${cfg.size.icon2.h}px !important; line-height:${cfg.size.icon2.h}px !important; text-align:center; padding:0 !important; font-size:13px !important; }`);
   L.push('.charsheet .coc-sheet button[type=roll].rollicon1:hover,.charsheet .coc-sheet button[type=roll].rollicon2:hover{ background-color:rgba(46,110,145,.18) !important; }');
+  L.push('.charsheet .coc-sheet .notes{ position:relative; margin-top:14px; }');
+  L.push('.charsheet .coc-sheet .notes .nt-r{ position:absolute; opacity:0; width:0; height:0; pointer-events:none; }');
+  L.push(`.charsheet .coc-sheet .notes .nt-tabbar{ display:flex; gap:6px; margin-bottom:8px; border-bottom:${cfg.shape.underline||1}px solid ${rgbaOf(cfg.fg,.22)}; }`);
+  L.push(`.charsheet .coc-sheet .notes .nt-tab{ cursor:pointer; padding:4px 13px; font-weight:bold; color:${colHeader}; letter-spacing:1px; border-radius:6px 6px 0 0; opacity:.5; }`);
+  L.push(`.charsheet .coc-sheet .notes #nt-misc:checked ~ .nt-tabbar .nt-tab-misc,.charsheet .coc-sheet .notes #nt-story:checked ~ .nt-tabbar .nt-tab-story{ opacity:1; background:${boxBg}; }`);
+  L.push('.charsheet .coc-sheet .notes .nt-panel{ display:none; }');
+  L.push('.charsheet .coc-sheet .notes #nt-misc:checked ~ .nt-panel-misc,.charsheet .coc-sheet .notes #nt-story:checked ~ .nt-panel-story{ display:block; }');
+  L.push(`.charsheet .coc-sheet .notes textarea.nbox{ width:100%; min-height:90px; box-sizing:border-box; border:${nBorder}; background:${nBg}; border-radius:${boxRad}; padding:8px 10px; color:${nText}; font-family:inherit; resize:vertical; }`);
+  L.push('.charsheet .coc-sheet .notes .backgrid{ display:grid; grid-template-columns:1fr 1fr; gap:9px 12px; }');
+  L.push('.charsheet .coc-sheet .notes .bfield.wide{ grid-column:1 / -1; }');
+  L.push(`.charsheet .coc-sheet .notes .bfield label{ display:block; font-size:11px; font-weight:bold; color:${colHeader}; letter-spacing:.5px; margin-bottom:3px; }`);
+  L.push(`.charsheet .coc-sheet .notes textarea.bbox{ width:100%; min-height:52px; box-sizing:border-box; border:${nBorder}; background:${nBg}; border-radius:${boxRad}; padding:6px 8px; color:${nText}; font-family:inherit; resize:vertical; }`);
   L.push(rollTemplateCss());
   return L.join('\n');
 }
@@ -1131,20 +1518,34 @@ function buildHtml(){
   L.push('    </div>');
   L.push('    <div class="cards">');
   [['hp','체력','건강'],['mp','마력','평정심'],['san','이성','광기의 발작']].forEach(([k,lab,tag])=>{
-    L.push(`      <div class="scard"><div>${lab}</div>`+
-      `<div class="big"><input type="number" name="attr_${k}" value="${V[k+'_cur']}"></div>`+
-      `<div class="sub">/ <input type="number" name="attr_${k}_max" value="${V[k+'_max']}" style="width:42px;text-align:center"></div>`+
-      `<div class="accent">${tag}</div></div>`);
+    const roll = (k==='san')
+      ? `<span class="cardroll"><button type="roll" class="rollicon1" name="roll_san" value="${cocRollVal('이성','@{san}',false)}" title="이성 판정">◆</button>`+
+        `<button type="roll" class="rollicon2" name="roll_san_bonus" value="${cocRollVal('이성','@{san}',true)}" title="이성 (보너스/페널티)">◆</button></span>`
+      : `<span class="cardroll"></span>`;
+    L.push(`      <div class="scard"><div class="lab">${lab}</div>`+
+      `<div class="cm"><input class="cur" type="number" name="attr_${k}" value="${V[k+'_cur']}">`+
+      `<span class="div">|</span>`+
+      `<input class="mx" type="number" name="attr_${k}_max" value="${V[k+'_max']}"></div>${roll}</div>`);
   });
+  L.push(`      <div class="scard luckcard"><div class="lab">운</div>`+
+    `<div class="cm"><input class="cur" type="number" name="attr_luck" value="${V.luck}">`+
+    `<span class="div">|</span>`+
+    `<input class="mx" type="number" name="attr_luck_max" value="${V.luck_max}"></div>`+
+    `<span class="cardroll"><button type="roll" class="rollicon1" name="roll_luck" value="${cocRollVal('행운','@{luck}',false)}" title="운 굴림">◆</button>`+
+    `<button type="roll" class="rollicon2" name="roll_luck_bonus" value="${cocRollVal('행운','@{luck}',true)}" title="운 (보너스/페널티)">◆</button></span></div>`);
   L.push('    </div>');
   L.push('  </div>');
-  L.push(`  <div class="winter">${esc(cfg.winter)}</div>`);
+  L.push('  <div class="madrow">'+
+    '<span class="madlab">광기의 발작</span>'+
+    '<button type="roll" class="madbtn" name="roll_madness_rt" value="&{template:madrt} {{roll1=[[1d10]]}}">◆ 실시간</button>'+
+    '<button type="roll" class="madbtn" name="roll_madness_summ" value="&{template:madsumm} {{roll1=[[1d10]]}}">◆ 요약</button>'+
+    '<span class="madstart">시작 이성 <input type="number" name="attr_san_start" value="'+V.san_start+'"></span></div>');
+  if(cfg.dividerOn!==false) L.push(`  <div class="winter">${esc(cfg.winter)}</div>`);
   L.push('  <div class="sec">능력치</div>');
   L.push('  <div class="chars">');
   CHARS.forEach(([id,nm])=>{
     L.push(`    <div class="c"><div class="nm">${nm}</div>`+
       `<input type="number" name="attr_${id}" value="${V[id]}">`+
-      `<div class="hf"><input class="hfv" type="text" name="attr_${id}_half" readonly> · <input class="hfv" type="text" name="attr_${id}_fifth" readonly></div>`+
       `<div class="ic"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
       `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button></div></div>`);
   });
@@ -1152,27 +1553,27 @@ function buildHtml(){
   L.push('  <div class="sec">기능</div>');
   L.push('  <div class="skills">');
   SKILLS.forEach(([id,nm])=>{
-    L.push(`    <div class="skill"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
-      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button>`+
-      `<span class="nm">${nm}</span><input type="number" name="attr_${id}" value="${V[id]}">`+
-      `<span class="hf2"><input class="hfv" type="text" name="attr_${id}_half" readonly>/<input class="hfv" type="text" name="attr_${id}_fifth" readonly></span></div>`);
+    L.push(`    <div class="skill"><input type="checkbox" class="skchk" name="attr_${id}_check" value="1"><span class="nm">${nm}</span>`+
+      `<input type="number" name="attr_${id}" value="${V[id]}">`+
+      `<span class="ic"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
+      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button></span></div>`);
   });
   cfg.customSkills.forEach((s,i)=>{
     const id='customskill'+(i+1), nm=esc(s.name);
-    L.push(`    <div class="skill"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
-      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button>`+
-      `<span class="nm">${nm}</span><input type="number" name="attr_${id}" value="${esc(s.value)}">`+
-      `<span class="hf2"><input class="hfv" type="text" name="attr_${id}_half" readonly>/<input class="hfv" type="text" name="attr_${id}_fifth" readonly></span></div>`);
+    L.push(`    <div class="skill"><input type="checkbox" class="skchk" name="attr_${id}_check" value="1"><span class="nm">${nm}</span>`+
+      `<input type="number" name="attr_${id}" value="${esc(s.value)}">`+
+      `<span class="ic"><button type="roll" class="rollicon1" name="roll_${id}" value="${cocRollVal(nm,'@{'+id+'}',false)}">◆</button>`+
+      `<button type="roll" class="rollicon2" name="roll_${id}_bonus" value="${cocRollVal(nm,'@{'+id+'}',true)}">◆</button></span></div>`);
   });
   L.push('  </div>');
   // 플레이어가 직접 기능을 추가할 수 있는 repeating 섹션 (+Add / Modify 자동 생성)
   L.push('  <div class="accent" style="margin-top:10px">기능 추가</div>');
   L.push('  <fieldset class="repeating_skills">');
   L.push('    <div class="skill">'+
-    '<button type="roll" class="rollicon1" name="roll_skill" value="&{template:coc} {{name=@{skillname}}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[1d100]]}}">◆</button>'+
-    '<button type="roll" class="rollicon2" name="roll_skill_bonus" value="&{template:coc} {{name=@{skillname} (보너스/페널티)}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[?{보너스·페널티|보너스,2d100kl1|페널티,2d100kh1}]]}}">◆</button>'+
-    '<input type="text" class="nm" name="attr_skillname" placeholder="기능 이름" style="flex:1">'+
-    '<input type="number" name="attr_skill" value="0"></div>');
+    '<input type="checkbox" class="skchk" name="attr_skillcheck" value="1"><input type="text" class="nm" name="attr_skillname" placeholder="기능 이름" style="flex:1">'+
+    '<input type="number" name="attr_skill" value="0">'+
+    '<span class="ic"><button type="roll" class="rollicon1" name="roll_skill" value="&{template:coc} {{name=@{skillname}}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[1d100]]}}">◆</button>'+
+    '<button type="roll" class="rollicon2" name="roll_skill_bonus" value="&{template:coc} {{name=@{skillname} (보너스/페널티)}} {{success=[[@{skill}]]}} {{hard=[[floor(@{skill}/2)]]}} {{extreme=[[floor(@{skill}/5)]]}} {{roll1=[[1d100]]}} {{roll2=[[1d100]]}} {{roll3=[[1d100]]}}">◆</button></span></div>');
   L.push('  </fieldset>');
   L.push('  <div class="sec">무기 / 전투</div>');
   L.push('  <table class="weap"><tr><th class="wroll"></th><th>무기</th><th>기능</th><th>피해</th><th>사거리</th><th>공격횟수</th><th>탄약</th><th>고장</th></tr>'+
@@ -1185,11 +1586,12 @@ function buildHtml(){
     '<td><input type="text" name="attr_weapon1_malf"></td></tr>'+
     cfg.customWeapons.map((w,i)=>{
       const id='cweapon'+(i+1);
+      const useDb = w.db!==false;
       return `<tr>`+
-        `<td class="wroll"><button type="roll" class="rollicon1" name="roll_${id}" value="${weaponRollVal(id+'_name',id+'_skill',id+'_dmg')}">◆</button></td>`+
+        `<td class="wroll"><button type="roll" class="rollicon1" name="roll_${id}" value="${weaponRollVal(id+'_name',id+'_skill',id+'_dmg',useDb)}">◆</button></td>`+
         `<td><input type="text" name="attr_${id}_name" value="${esc(w.name||'')}"></td>`+
         `<td><input type="number" name="attr_${id}_skill" value="${esc(w.skill||'')}"></td>`+
-        `<td class="wdmg"><input type="text" name="attr_${id}_dmg" value="${esc(w.dmg||'')}"> <span>+ db</span></td>`+
+        `<td class="wdmg"><input type="text" name="attr_${id}_dmg" value="${esc(w.dmg||'')}">${useDb?' <span>+ db</span>':''}</td>`+
         `<td><input type="text" name="attr_${id}_range" value="${esc(w.range||'')}"></td>`+
         `<td><input type="text" name="attr_${id}_atk" value="${esc(w.atk||'')}"></td>`+
         `<td><input type="text" name="attr_${id}_ammo" value="${esc(w.ammo||'')}"></td>`+
@@ -1209,8 +1611,15 @@ function buildHtml(){
     '<input type="text" name="attr_weaponammo" placeholder="탄약">'+
     '<input type="text" name="attr_weaponmalf" placeholder="고장"></div>');
   L.push('  </fieldset>');
-  L.push('  <div class="sec">기타</div>');
-  L.push('  <textarea name="attr_notes" style="width:100%;min-height:60px;border:1px solid var(--line)"></textarea>');
+  L.push('  <div class="notes">');
+  L.push('  <input type="radio" class="nt-r" name="attr_notetab" id="nt-misc" value="misc" checked>');
+  L.push('  <input type="radio" class="nt-r" name="attr_notetab" id="nt-story" value="story">');
+  L.push('  <div class="nt-tabbar"><label for="nt-misc" class="nt-tab nt-tab-misc">기타</label><label for="nt-story" class="nt-tab nt-tab-story">배경이야기</label></div>');
+  L.push('  <div class="nt-panel nt-panel-misc"><textarea name="attr_notes" class="nbox"></textarea></div>');
+  L.push('  <div class="nt-panel nt-panel-story"><div class="backgrid">');
+  BACKFIELDS.forEach(([id,lab,wide])=> L.push(`    <div class="bfield${wide?' wide':''}"><label>${lab}</label><textarea name="attr_${id}" class="bbox"></textarea></div>`));
+  L.push('  </div></div>');
+  L.push('  </div>');
   L.push('</div>');
   L.push('');
   L.push('<script type="text/worker">');
@@ -1254,6 +1663,8 @@ function buildHtml(){
   L.push('<\/script>');
   L.push('');
   L.push(rollTemplateHtml());
+  L.push(madnessTemplateHtml('madrt','광기의 발작 — 실시간', MAD_RT));
+  L.push(madnessTemplateHtml('madsumm','광기의 발작 — 요약', MAD_SUMM));
   return L.join('\n');
 }
 
