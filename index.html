@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     /* 빌더 UI — 화이트/블랙 톤 */
@@ -269,6 +270,7 @@
   <div class="sp"></div>
   <button id="bImport">불러오기</button>
   <button id="bSave">저장</button>
+  <button id="bImage">이미지</button>
   <button class="solid" id="bExport">내보내기</button>
   <input type="file" id="fileIn" accept="application/json" hidden>
 </header>
@@ -576,6 +578,7 @@ CHARS.forEach(([id,,v])=> cfg.values[id]=v);
 SKILLS.forEach(([id,,v])=> cfg.values[id]=v);
 cfg.values.hp_cur=10; cfg.values.hp_max=10; cfg.values.mp_cur=10; cfg.values.mp_max=10;
 cfg.values.san_cur=40; cfg.values.san_max=99; cfg.values.san_start=99; cfg.values.luck=50; cfg.values.luck_max=99;
+
 
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
@@ -1172,6 +1175,20 @@ tWinterOn.addEventListener('change',()=>{ cfg.dividerOn=tWinterOn.checked; build
 
 /* ===== 저장 / 불러오기 ===== */
 document.getElementById('bSave').onclick=()=>download('coc-builder.json', JSON.stringify(cfg,null,2),'application/json');
+document.getElementById('bImage').onclick=()=>{
+  const el=document.getElementById('sheet');
+  if(typeof html2canvas!=='function'){ alert('이미지 라이브러리를 불러오지 못했습니다. 인터넷 연결 후 새로고침 해주세요.'); return; }
+  const btn=document.getElementById('bImage'), old=btn.textContent;
+  btn.textContent='만드는 중…'; btn.disabled=true;
+  html2canvas(el,{ scale:3, useCORS:true, backgroundColor:null, logging:false }).then(canvas=>{
+    canvas.toBlob(b=>{
+      const url=URL.createObjectURL(b), a=document.createElement('a');
+      a.href=url; a.download='coc-시트.png'; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1500);
+      btn.textContent=old; btn.disabled=false;
+    },'image/png');
+  }).catch(err=>{ alert('이미지 저장 실패: '+err); btn.textContent=old; btn.disabled=false; });
+};
 document.getElementById('bImport').onclick=()=>document.getElementById('fileIn').click();
 document.getElementById('fileIn').onchange=e=>{
   const f=e.target.files[0]; if(!f) return; const r=new FileReader();
